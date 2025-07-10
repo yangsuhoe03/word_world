@@ -1,0 +1,24 @@
+[
+  {
+    "year": 2024,
+    "month": 3,
+    "grade": 3,
+    "number": 1,
+    "questionnumber": 18,
+    "word": "abandon",
+    "meaning": "버리다",
+    "example": "He decided to abandon the project.",
+    "examplemeaning": "예시문장이 이런 것이다"
+  },
+  {
+    "year": 2024,
+    "month": 3,
+    "grade": 3,
+    "number": 1,
+    "questionnumber": 18,
+    "word": "benefit",
+    "meaning": "이익",
+    "example": "There are many benefits to regular exercise.",
+    "examplemeaning": "예시문장 두번째는 이런 것이다"
+  }
+]
