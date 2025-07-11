@@ -23,13 +23,13 @@ function shuffleArray(array) {
 
 
 export default function VocabularyScreen({route, navigation}) {
-    //const route = useRoute(); // 라우트 파라미터 접근
-    //const range = route.params.range;
-    //const wordList = route.params.words.wordList || []; // 전달받은 단어 리스트
-    const [words, setWords] = useState([]); // 현재 단어 리스트
-    const [index, setIndex] = useState(0); // 현재 단어 인덱스
-    const [knownCount, setKnownCount] = useState(0); // 알고 있는 단어 개수
-    const [showMeaning, setShowMeaning] = useState(false); // 해석 보기 여부
+    const [words, setWords] = useState([]);
+    const [index, setIndex] = useState(0);
+    const [knownCount, setKnownCount] = useState(0);
+    const [showMeaning, setShowMeaning] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
+    const [startTime, setStartTime] = useState(null); // 공부 시작 시간
+    const [endTime, setEndTime] = useState(null);     // 공부 종료 시간
 
     useEffect(() => {
         // 전달받은 단어 리스트와 범위
@@ -42,28 +42,31 @@ export default function VocabularyScreen({route, navigation}) {
         let filtered;
         if (selectedRange === '1-50') {
             filtered = baseWords.filter(word => word.number <= 50);
-
-            
         } else if (selectedRange === '1-100') {
-            filtered = baseWords; // 전체 사용
+            filtered = baseWords;
         } else if (selectedRange === '1-150') {
             filtered = baseWords.filter(word => word.number <= 150);
-        }
-        else if (selectedRange === '1-200') {
+        } else if (selectedRange === '1-200') {
             filtered = baseWords.filter(word => word.number <= 200);
-        }
-            
-         else {
-            filtered = baseWords; // 기본은 전체
+        } else {
+            filtered = baseWords;
         }
 
-        const shuffled = shuffleArray(filtered);
-
-        setWords(shuffled); // 섞인 단어 리스트 세팅
-        setIndex(0); // 인덱스 초기화
-        setKnownCount(0); // 알고 있는 단어 개수 초기화
-        setShowMeaning(false); // 해석 숨김
+        setWords(shuffleArray(filtered));
+        setIndex(0);
+        setKnownCount(0);
+        setShowMeaning(false);
+        setIsFinished(false);
+        setStartTime(Date.now()); // 시작할 때 시간 기록
+        setEndTime(null);
     }, [route.params]);
+
+    // 회독 완료 시 종료 시간 기록
+    useEffect(() => {
+        if (isFinished && !endTime && startTime) {
+            setEndTime(Date.now());
+        }
+    }, [isFinished, endTime, startTime]);
 
     // 단어 데이터가 없을 때 로딩 안내
     if (words.length === 0) {
@@ -73,12 +76,39 @@ export default function VocabularyScreen({route, navigation}) {
             </VocabularyContainer>
         );
     }
-    
+
+    // 회독 완료 시 걸린 시간 안내 창
+    if (isFinished && endTime && startTime) {
+        const elapsed = Math.floor((endTime - startTime) / 1000);
+        const min = Math.floor(elapsed / 60);
+        const sec = elapsed % 60;
+        return (
+            <VocabularyContainer style={styles.container}>
+                <Text style={styles.word}>회독 완료!</Text>
+                <Text style={styles.number}>
+                    알고 있는 단어: {knownCount} / {words.length}
+                </Text>
+                <Text style={styles.number}>
+                    공부 시간: {min}분 {sec}초
+                </Text>
+                <Button
+                    title="홈으로"
+                    onPress={() => navigation.navigate('Home')}
+                />
+            </VocabularyContainer>
+        );
+    }
+
     const word = words[index]; // 현재 단어
 
     // '알고 있음' 버튼 클릭 시
     const handleKnow = () => {
-        setKnownCount(knownCount + 1); // 알고 있는 단어 개수 증가
+        setWords(prevWords => {
+            const newWords = [...prevWords];
+            newWords[index] = { ...newWords[index], isKnown: true };
+            return newWords;
+        });
+        setKnownCount(knownCount + 1);
         nextWord();
     };
 
@@ -93,40 +123,73 @@ export default function VocabularyScreen({route, navigation}) {
             setIndex(index + 1);
             setShowMeaning(false);
         } else {
-            alert(`회독 완료! 알고 있는 단어: ${knownCount} / ${words.length}`);
-            setIndex(0);
-            setKnownCount(0);
-            setShowMeaning(false);
+            setIsFinished(true);
         }
+    };
+
+    // 모르는 단어만 다시 회독
+    const handleRetryUnknown = () => {
+        const unknownWords = words.filter(w => !w.isKnown);
+        if (unknownWords.length === 0) {
+            setIsFinished(false);
+            setStartTime(Date.now());
+            setEndTime(null);
+            return;
+        }
+        setWords(shuffleArray(unknownWords));
+        setIndex(0);
+        setKnownCount(0);
+        setShowMeaning(false);
+        setIsFinished(false);
+        setStartTime(Date.now());
+        setEndTime(null);
+    };
+
+    // 종료 버튼
+    const handleFinish = () => {
+        navigation.navigate('Home');
     };
 
     return (
         <VocabularyContainer style={styles.container}>
-            <Text style={styles.number}>{index + 1} / {words.length}</Text>
-            <Text style={styles.word}>{word.word}</Text>
-            {/* 해석 보기/숨기기 */}
-            {showMeaning && (
-                <VocabularyContainer style={styles.meaningBox}>
-                    <Text style={styles.meaning}>{word.meaning}</Text>
-                </VocabularyContainer>
+            {/* 회독 완료 시 결과창 */}
+            {isFinished && (
+                <>
+                    <Text style={styles.word}>회독 완료!</Text>
+                    <Text style={styles.number}>알고 있는 단어: {knownCount} / {words.length}</Text>
+                    <VocabularyContainer style={styles.buttonRow}>
+                        <Button title="모르는 단어만 다시 회독하기" onPress={handleRetryUnknown} />
+                        <Button title="종료" onPress={handleFinish} />
+                    </VocabularyContainer>
+                </>
             )}
-            <Text style={styles.example}>{word.example}</Text>
-            {/* 예문 해석 보기/숨기기 */}
-            {showMeaning && (
-                <VocabularyContainer style={styles.meaningBox}>
-                    <Text style={styles.exampleMeaning}>{word.examplemeaning}</Text>
-                </VocabularyContainer>
-            )}
-            <Button
-                title={showMeaning ? "해석 숨기기" : "해석 보기"}
-                onPress={() => setShowMeaning(!showMeaning)}
-            />
 
-            {/* 학습 결과 버튼 */}
-            <VocabularyContainer style={styles.buttonRow}>
-                <Button title="✅ 알고 있음" onPress={handleKnow} />
-                <Button title="❌ 모르겠음" onPress={handleDontKnow} />
-            </VocabularyContainer>
+            {/* 회독 중일 때만 단어 학습 UI */}
+            {!isFinished && (
+                <>
+                    <Text style={styles.number}>{index + 1} / {words.length}</Text>
+                    <Text style={styles.word}>{word.word}</Text>
+                    {showMeaning && (
+                        <VocabularyContainer style={styles.meaningBox}>
+                            <Text style={styles.meaning}>{word.meaning}</Text>
+                        </VocabularyContainer>
+                    )}
+                    <Text style={styles.example}>{word.example}</Text>
+                    {showMeaning && (
+                        <VocabularyContainer style={styles.meaningBox}>
+                            <Text style={styles.exampleMeaning}>{word.examplemeaning}</Text>
+                        </VocabularyContainer>
+                    )}
+                    <Button
+                        title={showMeaning ? "해석 숨기기" : "해석 보기"}
+                        onPress={() => setShowMeaning(!showMeaning)}
+                    />
+                    <VocabularyContainer style={styles.buttonRow}>
+                        <Button title="✅ 알고 있음" onPress={handleKnow} />
+                        <Button title="❌ 모르겠음" onPress={handleDontKnow} />
+                    </VocabularyContainer>
+                </>
+            )}
         </VocabularyContainer>
     );
 }
