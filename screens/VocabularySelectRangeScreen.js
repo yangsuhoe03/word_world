@@ -19,8 +19,8 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
     // const route = useRoute(); // 라우트 파라미터 접근
     // const { year, month, grade } = route.params || {}; // 전달받은 연도, 월, 학년
     const year = route.params.year;
-    console.log('year', route);
-    console.log('year', route.params);
+    //console.log('year', route);
+    //console.log('year', route.params);
     const month = route.params.month;
     const grade = route.params.grade;
 
