@@ -3,6 +3,7 @@ import exampleWords from './word_example100.json';
 
 export const wordFileMap = {
     '2025_03_1': exampleWords,
+    '2025_06_1': require('./word/2021_03_1_word.json'),
 
     '2021_03_2': require('./2025_03_1_word.json'),
     // '2021_03_2': require('./2021_03_2_word.json'),

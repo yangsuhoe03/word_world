@@ -31,7 +31,6 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
         const key = `${year}_${String(month).padStart(2, '0')}_${grade}`; // 파일명 규칙에 맞게 key 생성
         const data = wordFileMap[key]; // 해당 key로 단어 데이터 찾기
         
-        //console.log('키:', key, '데이터:', data);
         if (data && Array.isArray(data)) {
             setWordList(data); // 데이터가 있으면 세팅
         } else {

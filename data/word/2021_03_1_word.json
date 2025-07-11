@@ -1,0 +1,12 @@
+[
+  { "year":2024, "month":3, "grade":3, "number":1, "questionnumber":1, "word":"abandon", "meaning":"aaaaa버리다", "example":"He decided to abandon the project.", "examplemeaning":"예시문장이 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":2, "questionnumber":2, "word":"benefit", "meaning":"aaaa이익", "example":"There are many benefits to regular exercise.", "examplemeaning":"예시문장 두번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":3, "questionnumber":3, "word":"capture", "meaning":"aaaaa포획하다", "example":"The army managed to capture the enemy base.", "examplemeaning":"예시문장 세번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":4, "questionnumber":4, "word":"deliver", "meaning":"aaaa배달하다", "example":"They deliver packages every morning.", "examplemeaning":"예시문장 네번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":5, "questionnumber":5, "word":"encourage", "meaning":"aaa격려하다", "example":"Teachers encourage students to ask questions.", "examplemeaning":"예시문장 다섯번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":6, "questionnumber":6, "word":"focus", "meaning":"aa집중하다", "example":"You need to focus on your studies.", "examplemeaning":"예시문장 여섯번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":7, "questionnumber":7, "word":"gather", "meaning":"모으다", "example":"We gathered all the data for the report.", "examplemeaning":"예시문장 일곱번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":8, "questionnumber":8, "word":"handle", "meaning":"다루다", "example":"She can handle difficult situations well.", "examplemeaning":"예시문장 여덟번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":9, "questionnumber":9, "word":"improve", "meaning":"향상시키다", "example":"Practice will improve your skills.", "examplemeaning":"예시문장 아홉번째는 이런 것이다" },
+  { "year":2024, "month":3, "grade":3, "number":10, "questionnumber":10, "word":"join", "meaning":"참여하다", "example":"Would you like to join our club?", "examplemeaning":"예시문장 열번째는 이런 것이다" }
+]

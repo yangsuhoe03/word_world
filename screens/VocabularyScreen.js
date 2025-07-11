@@ -30,8 +30,8 @@ export default function VocabularyScreen() {
 
         let filtered;
         if (selectedRange === '1-50') {
-            filtered = baseWords.filter(word => word.number <= 50); // 1~50번만 사용
-            console.log('선택된 범위:', filtered);
+            filtered = baseWords.filter(word => word.number <= 50);
+            
         } else if (selectedRange === '1-100') {
             filtered = baseWords; // 전체 사용
         } else {
