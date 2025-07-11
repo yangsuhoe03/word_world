@@ -1,4 +1,8 @@
 
+// InterpretationSelectNumberScreen 컴포넌트
+// - 해석 연습 단어 개수 선택 화면의 메인 컴포넌트입니다.
+// - 사용자가 원하는 단어 개수를 선택하면 해석 연습 화면으로 이동합니다.
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

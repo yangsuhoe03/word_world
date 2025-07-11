@@ -1,3 +1,5 @@
+// HomeScreen 컴포넌트
+// - 학년/연도 선택 및 모의고사 목록 필터링, 상세 화면 이동을 담당합니다.
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +24,8 @@ export default function HomeScreen() {
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedYears, setSelectedYears] = useState([2025]); // 기본값: 2025년만 선택
 
+  // toggleYear 함수
+  // - 연도 버튼 클릭 시 해당 연도의 선택/해제를 토글합니다.
   const toggleYear = (year) => {
     if (selectedYears.includes(year)) {
       setSelectedYears(selectedYears.filter((y) => y !== year));
@@ -32,6 +36,8 @@ export default function HomeScreen() {
 
   const isAllSelected = years.every((y) => selectedYears.includes(y));
 
+  // handleToggleAllYears 함수
+  // - 전체 선택 버튼 클릭 시 모든 연도의 선택/해제를 토글합니다.
   const handleToggleAllYears = () => {
     if (isAllSelected) {
       setSelectedYears([]); // 전체 해제

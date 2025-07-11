@@ -1,3 +1,6 @@
+// MockTestDetailScreen 컴포넌트
+// - 모의고사 상세 정보를 보여주는 메인 컴포넌트입니다.
+// - 연도, 월, 학년 정보에 따라 해당 모의고사의 세부 내용을 확인할 수 있습니다.
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';

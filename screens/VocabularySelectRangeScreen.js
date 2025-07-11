@@ -1,3 +1,6 @@
+// VocabularySelectRangeScreen 컴포넌트
+// - 단어 암기 연습 범위 선택 화면의 메인 컴포넌트입니다.
+// - 사용자가 원하는 단어 범위를 선택하면 해당 범위의 단어 암기 화면으로 이동합니다.
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';

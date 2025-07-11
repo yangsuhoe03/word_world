@@ -1,3 +1,6 @@
+// InterpretationScreen 컴포넌트
+// - 단어 해석 연습 화면의 메인 컴포넌트입니다.
+// - 단어와 뜻을 보여주고, 사용자가 해석을 확인하거나 다음 단어로 넘어갈 수 있습니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';

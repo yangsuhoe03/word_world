@@ -1,3 +1,6 @@
+// TopicScreen 컴포넌트
+// - 주제별 단어 목록 화면의 메인 컴포넌트입니다.
+// - 각 주제를 선택하면 해당 주제에 속한 단어들을 확인할 수 있습니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import topicData from '../data/topic_example.json';

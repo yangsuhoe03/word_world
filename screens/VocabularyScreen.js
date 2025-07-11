@@ -1,3 +1,6 @@
+// VocabularyScreen 컴포넌트
+// - 전체 단어 목록 화면의 메인 컴포넌트입니다.
+// - 단어와 뜻을 리스트로 확인할 수 있습니다.
 import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import fallbackWords from '../data/word_example100.json'; // 이름도 변경하면 좋음
