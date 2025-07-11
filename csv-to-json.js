@@ -3,7 +3,7 @@ const path = require("path");
 const csv = require("csv-parser");
 
 const inputFilePath = path.join(__dirname, "word_template.csv");
-const outputFilePath = path.join(__dirname, "2025-03-1-word.json");
+const outputFilePath = path.join(__dirname, "./data/word/2025_03_1_word.json");
 
 const results = [];
 
