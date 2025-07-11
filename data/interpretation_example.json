@@ -1,0 +1,28 @@
+[
+  {
+    "number": "1",
+    "sentences": [
+      {
+        "english": "The boy runs across the field.",
+        "korean": "소년은 들판을 가로질러 달린다."
+      },
+      {
+        "english": "He holds a kite.",
+        "korean": "그는 연을 들고 있다."
+      }
+    ]
+  },
+  {
+    "number": "41-42",
+    "sentences": [
+      {
+        "english": "He gave me some advice.",
+        "korean": "그는 나에게 조언을 해주었다."
+      },
+      {
+        "english": "He told me to work hard.",
+        "korean": "그는 열심히 일하라고 말했다."
+      }
+    ]
+  }
+]
