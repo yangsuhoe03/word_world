@@ -21,7 +21,6 @@ export default function VocabularyScreen() {
         if (selectedRange === '1-50') {
             filtered = baseWords.filter(word => word.number <= 50);
             
-            console.log('선택된 범위:', filtered);
         } else if (selectedRange === '1-100') {
             filtered = baseWords; // 전체 다 사용
         } else {

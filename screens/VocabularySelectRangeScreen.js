@@ -15,7 +15,6 @@ export default function VocabularySelectRangeScreen() {
         const key = `${year}_${String(month).padStart(2, '0')}_${grade}`; // ex: 2024_03_3
         const data = wordFileMap[key];
         
-    console.log('키:', key, '데이터:', data);
         if (data && Array.isArray(data)) {
             setWordList(data);
         } else {
