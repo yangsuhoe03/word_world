@@ -8,7 +8,8 @@
     "word": "compelling",
     "meaning": "설득력 있는",
     "example": "The evidence was so compelling that the jury had no choice.",
-    "examplemeaning": "이거의 뜻은 이거이거다."
+    "examplemeaning": "이거의 뜻은 이거이거다.",
+    "isKnown": false
   },
   {
     "year": 2024,
@@ -19,6 +20,7 @@
     "word": "assert",
     "meaning": "주장하다",
     "example": "He asserted his innocence at the trial.",
-    "examplemeaning": "이거의 뜻은 저거저거이다."
+    "examplemeaning": "이거의 뜻은 저거저거이다.",
+    "isKnown": false
   }
 ]

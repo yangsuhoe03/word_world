@@ -12,9 +12,20 @@ function VocabularyContainer(props) {
     </View>
   );
 }
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
 
-export default function VocabularyScreen() {
-    const route = useRoute(); // 라우트 파라미터 접근
+
+export default function VocabularyScreen({route, navigation}) {
+    //const route = useRoute(); // 라우트 파라미터 접근
+    //const range = route.params.range;
+    //const wordList = route.params.words.wordList || []; // 전달받은 단어 리스트
     const [words, setWords] = useState([]); // 현재 단어 리스트
     const [index, setIndex] = useState(0); // 현재 단어 인덱스
     const [knownCount, setKnownCount] = useState(0); // 알고 있는 단어 개수
@@ -22,8 +33,8 @@ export default function VocabularyScreen() {
 
     useEffect(() => {
         // 전달받은 단어 리스트와 범위
-        const paramWords = route.params?.words;
-        const selectedRange = route.params?.range;
+        const paramWords = route.params.words;
+        const selectedRange = route.params.range;
 
         // 단어 데이터가 없으면 fallback 사용
         const baseWords = Array.isArray(paramWords) && paramWords.length > 0 ? paramWords : fallbackWords;
@@ -31,14 +42,24 @@ export default function VocabularyScreen() {
         let filtered;
         if (selectedRange === '1-50') {
             filtered = baseWords.filter(word => word.number <= 50);
+
             
         } else if (selectedRange === '1-100') {
             filtered = baseWords; // 전체 사용
-        } else {
+        } else if (selectedRange === '1-150') {
+            filtered = baseWords.filter(word => word.number <= 150);
+        }
+        else if (selectedRange === '1-200') {
+            filtered = baseWords.filter(word => word.number <= 200);
+        }
+            
+         else {
             filtered = baseWords; // 기본은 전체
         }
 
-        setWords(filtered); // 단어 리스트 세팅
+        const shuffled = shuffleArray(filtered);
+
+        setWords(shuffled); // 섞인 단어 리스트 세팅
         setIndex(0); // 인덱스 초기화
         setKnownCount(0); // 알고 있는 단어 개수 초기화
         setShowMeaning(false); // 해석 숨김

@@ -22,7 +22,8 @@ results.push({
     word: data.word.trim(),
     meaning: data.meaning.trim(),
     example: data.example.trim(),
-    examplemeaning: data.examplemeaning.trim()
+    examplemeaning: data.examplemeaning.trim(),
+    isKnown: false, // 기본값 false로 설정
 });
 })
 .on("end", () => {
