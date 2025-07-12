@@ -30,6 +30,7 @@ export default function VocabularyScreen({route, navigation}) {
     const [isFinished, setIsFinished] = useState(false);
     const [startTime, setStartTime] = useState(null); // 공부 시작 시간
     const [endTime, setEndTime] = useState(null);     // 공부 종료 시간
+    const [totalStudyTime, setTotalStudyTime] = useState(0); // 누적 공부 시간(초)
 
     useEffect(() => {
         // 전달받은 단어 리스트와 범위
@@ -59,12 +60,15 @@ export default function VocabularyScreen({route, navigation}) {
         setIsFinished(false);
         setStartTime(Date.now()); // 시작할 때 시간 기록
         setEndTime(null);
+        setTotalStudyTime(0); // 새 학습 시작 시 누적 시간 초기화
     }, [route.params]);
 
-    // 회독 완료 시 종료 시간 기록
+    // 회독 완료 시 종료 시간 기록 및 누적 공부 시간 저장
     useEffect(() => {
         if (isFinished && !endTime && startTime) {
-            setEndTime(Date.now());
+            const now = Date.now();
+            setEndTime(now);
+            setTotalStudyTime(prev => prev + Math.floor((now - startTime) / 1000));
         }
     }, [isFinished, endTime, startTime]);
 
@@ -77,29 +81,7 @@ export default function VocabularyScreen({route, navigation}) {
         );
     }
 
-    // 회독 완료 시 걸린 시간 안내 창
-    if (isFinished && endTime && startTime) {
-        const elapsed = Math.floor((endTime - startTime) / 1000);
-        const min = Math.floor(elapsed / 60);
-        const sec = elapsed % 60;
-        return (
-            <VocabularyContainer style={styles.container}>
-                <Text style={styles.word}>회독 완료!</Text>
-                <Text style={styles.number}>
-                    알고 있는 단어: {knownCount} / {words.length}
-                </Text>
-                <Text style={styles.number}>
-                    공부 시간: {min}분 {sec}초
-                </Text>
-                <Button
-                    title="홈으로"
-                    onPress={() => navigation.navigate('Home')}
-                />
-            </VocabularyContainer>
-        );
-    }
-
-    const word = words[index]; // 현재 단어
+    const word = words[index]; // ★ 이 줄을 추가하세요
 
     // '알고 있음' 버튼 클릭 시
     const handleKnow = () => {
@@ -117,7 +99,7 @@ export default function VocabularyScreen({route, navigation}) {
         nextWord();
     };
 
-    // 다음 단어로 이동하는 함수
+    // 다음 단어로 이동
     const nextWord = () => {
         if (index < words.length - 1) {
             setIndex(index + 1);
@@ -127,14 +109,15 @@ export default function VocabularyScreen({route, navigation}) {
         }
     };
 
-    // 모르는 단어만 다시 회독
+    // 모르는 단어만 다시 회독하기
     const handleRetryUnknown = () => {
         const unknownWords = words.filter(w => !w.isKnown);
         if (unknownWords.length === 0) {
-            setIsFinished(false);
-            setStartTime(Date.now());
-            setEndTime(null);
             return;
+        }
+        // 이전 회독 시간 누적
+        if (endTime && startTime) {
+            setTotalStudyTime(prev => prev + Math.floor((endTime - startTime) / 1000));
         }
         setWords(shuffleArray(unknownWords));
         setIndex(0);
@@ -145,28 +128,59 @@ export default function VocabularyScreen({route, navigation}) {
         setEndTime(null);
     };
 
-    // 종료 버튼
+    // 홈으로 이동
     const handleFinish = () => {
         navigation.navigate('Home');
     };
 
     return (
         <VocabularyContainer style={styles.container}>
-            {/* 회독 완료 시 결과창 */}
-            {isFinished && (
-                <>
-                    <Text style={styles.word}>회독 완료!</Text>
-                    <Text style={styles.number}>알고 있는 단어: {knownCount} / {words.length}</Text>
-                    <VocabularyContainer style={styles.buttonRow}>
-                        <Button title="모르는 단어만 다시 회독하기" onPress={handleRetryUnknown} />
-                        <Button title="종료" onPress={handleFinish} />
-                    </VocabularyContainer>
-                </>
-            )}
+            {isFinished ? (
+                (() => {
+                    const unknownWords = words.filter(w => !w.isKnown);
+                    // 마지막 회독 시간까지 누적
+                    const elapsed = endTime && startTime
+                        ? totalStudyTime
+                        : totalStudyTime;
+                    const min = Math.floor(elapsed / 60);
+                    const sec = elapsed % 60;
 
-            {/* 회독 중일 때만 단어 학습 UI */}
-            {!isFinished && (
+                    if (unknownWords.length === 0) {
+                        return (
+                            <>
+                                <Text style={styles.word}>회독 완료!</Text>
+                                <Text style={styles.number}>
+                                    알고 있는 단어: {knownCount} / {words.length}
+                                </Text>
+                                <Text style={styles.number}>
+                                    총 공부 시간: {min}분 {sec}초
+                                </Text>
+                                <Button
+                                    title="홈으로"
+                                    onPress={handleFinish}
+                                />
+                            </>
+                        );
+                    }
+                    return (
+                        <>
+                            <Text style={styles.word}>회독 완료!</Text>
+                            <Text style={styles.number}>
+                                알고 있는 단어: {knownCount} / {words.length}
+                            </Text>
+                            <Text style={styles.number}>
+                                총 공부 시간: {min}분 {sec}초
+                            </Text>
+                            <VocabularyContainer style={styles.buttonRow}>
+                                <Button title="모르는 단어만 다시 회독하기" onPress={handleRetryUnknown} />
+                                <Button title="홈으로" onPress={handleFinish} />
+                            </VocabularyContainer>
+                        </>
+                    );
+                })()
+            ) : (
                 <>
+                    {/* 회독 중일 때의 UI */}
                     <Text style={styles.number}>{index + 1} / {words.length}</Text>
                     <Text style={styles.word}>{word.word}</Text>
                     {showMeaning && (
