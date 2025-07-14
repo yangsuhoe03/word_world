@@ -1,3 +1,4 @@
+// 이 화면은 다양한 주제별로 단어 또는 문장 학습을 할 수 있도록 주제 목록을 보여주는 화면입니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import topicData from '../data/topic_example.json';

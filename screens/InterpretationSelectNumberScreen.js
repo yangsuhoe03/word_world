@@ -1,7 +1,8 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { interpretationFileMap } from '../data/interpretationFileMap.js';
+// 이 화면은 사용자가 해석(문장 해석) 문제의 번호를 선택할 수 있도록 해주는 화면입니다. 원하는 문제 번호를 선택하여 해석 학습을 시작할 수 있습니다.
 
 // 파일 내 컨테이너 컴포넌트 정의
 function InterpretationSelectNumberContainer(props) {
@@ -20,12 +21,26 @@ function InterpretationSelectNumberContainer(props) {
   );
 }
 
-export default function InterpretationSelectNumber() {
-  const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
+export default function InterpretationSelectNumber({route, navigation}) {
+    const year = route.params.year;
+    const month = route.params.month;
+    const grade = route.params.grade;
+
+    const [interpretationData, setInterpretationData] = useState(null);
+
+    useEffect(() => {
+        // key 예시: 2024_03_3
+        const key = `${year}_${String(month).padStart(2, '0')}_${grade}`; // 파일명 규칙에 맞게 key 생성
+        const data = interpretationFileMap[key]; // 해당 key로 해석 데이터 찾기
+        setInterpretationData(data);
+    }, [year, month, grade]);
 
   // 문제 번호 선택 시 Interpretation 화면으로 이동
   const handleSelect = (number) => {
-    navigation.navigate('Interpretation', { number });
+    navigation.navigate('Interpretation', {
+      number,
+      interpretations: interpretationData,
+    });
   };
 
   // 문제 번호 버튼 배열 생성 (41-42, 43-45는 묶어서 표시)

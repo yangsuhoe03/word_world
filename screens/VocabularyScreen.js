@@ -1,3 +1,4 @@
+// 이 화면은 사용자가 단어 목록을 보고, 단어별로 상세 정보를 확인하거나 학습할 수 있도록 하는 단어장(어휘) 메인 화면입니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
@@ -81,7 +82,7 @@ export default function VocabularyScreen({route, navigation}) {
         );
     }
 
-    const word = words[index]; // ★ 이 줄을 추가하세요
+    const word = words[index];
 
     // '알고 있음' 버튼 클릭 시
     const handleKnow = () => {

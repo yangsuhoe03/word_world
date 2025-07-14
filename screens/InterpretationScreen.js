@@ -1,7 +1,7 @@
+// 이 화면은 사용자가 선택한 해석(문장 해석) 문제의 문장들을 순서대로 학습할 수 있도록 해주는 화면입니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import interpretationData from '../data/interpretation_example.json';
 
 // 파일 내 컨테이너 컴포넌트 정의
 function InterpretationContainer(props) {
@@ -13,23 +13,39 @@ function InterpretationContainer(props) {
   );
 }
 
-export default function Interpretation() {
-  const route = useRoute(); // 라우트 파라미터 접근
-  const { number } = route.params || {}; // 선택된 문제 번호
-  
-  const [sentences, setSentences] = useState([]); // 해당 문제의 문장 리스트
-  const [currentIndex, setCurrentIndex] = useState(0); // 현재 문장 인덱스
-  const [showKorean, setShowKorean] = useState(false); // 해석 보기 여부
+export default function Interpretation({route, navigation}) {
+  const { number, interpretations } = route.params || {};
+  const [sentences, setSentences] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showKorean, setShowKorean] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+  const [totalStudyTime, setTotalStudyTime] = useState(0);
 
   useEffect(() => {
-    // interpretationData에서 해당 번호의 문장 리스트 찾기
-    const found = interpretationData.find(item => item.number === number);
-    if (found && found.sentences) {
-      setSentences(found.sentences);
-      setCurrentIndex(0);
-      setShowKorean(false);
+    // interpretations에서 해당 번호의 문장 리스트 찾기
+    if (interpretations && Array.isArray(interpretations)) {
+      const found = interpretations.find(item => item.number === number);
+      if (found && found.sentences) {
+        setSentences(found.sentences);
+        setCurrentIndex(0);
+        setShowKorean(false);
+        setIsFinished(false);
+        setStartTime(Date.now());
+        setEndTime(null);
+        setTotalStudyTime(0);
+      }
     }
-  }, [number]);
+  }, [number, interpretations]);
+
+  useEffect(() => {
+    if (isFinished && !endTime && startTime) {
+      const now = Date.now();
+      setEndTime(now);
+      setTotalStudyTime(prev => prev + Math.floor((now - startTime) / 1000));
+    }
+  }, [isFinished, endTime, startTime]);
 
   // 문장 데이터가 없을 때 로딩 안내
   if (sentences.length === 0) {
@@ -42,53 +58,139 @@ export default function Interpretation() {
 
   const currentSentence = sentences[currentIndex]; // 현재 문장
 
-  // 다음 문장으로 이동하는 함수
-  const handleNext = () => {
+  // '알겠음' 버튼 클릭 시
+  const handleKnow = () => {
+    setSentences(prev => {
+      const arr = [...prev];
+      arr[currentIndex] = { ...arr[currentIndex], isKnown: true };
+      return arr;
+    });
+    nextSentence();
+  };
+
+  // '모르겠음' 버튼 클릭 시
+  const handleDontKnow = () => {
+    setSentences(prev => {
+      const arr = [...prev];
+      arr[currentIndex] = { ...arr[currentIndex], isKnown: false };
+      return arr;
+    });
+    nextSentence();
+  };
+
+  // 다음 문장으로 이동
+  const nextSentence = () => {
     if (currentIndex < sentences.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setShowKorean(false);
     } else {
-      alert("문장 학습이 완료되었습니다!");
-      setCurrentIndex(0);
-      setShowKorean(false);
+      setIsFinished(true);
     }
+  };
+
+  // 모르는 문장만 다시 회독하기
+  const handleRetryUnknown = () => {
+    const unknown = sentences.filter(s => s.isKnown === false);
+    if (unknown.length === 0) return;
+    // 이전 회독 시간 누적
+    if (endTime && startTime) {
+      setTotalStudyTime(prev => prev + Math.floor((endTime - startTime) / 1000));
+    }
+    setSentences(unknown);
+    setCurrentIndex(0);
+    setShowKorean(false);
+    setIsFinished(false);
+    setStartTime(Date.now());
+    setEndTime(null);
+  };
+
+  // 홈으로 이동
+  const handleFinish = () => {
+    navigation.navigate('Home');
+  };
+
+  if (isFinished) {
+    const unknown = sentences.filter(s => s.isKnown === false);
+    const knownCount = sentences.filter(s => s.isKnown === true).length;
+    const min = Math.floor(totalStudyTime / 60);
+    const sec = totalStudyTime % 60;
+    return (
+      <InterpretationContainer style={styles.container}>
+        <Text style={styles.word}>회독 완료!</Text>
+        <Text style={styles.number}>알고 있는 문장: {knownCount} / {sentences.length}</Text>
+        <Text style={styles.number}>총 공부 시간: {min}분 {sec}초</Text>
+        {unknown.length === 0 ? (
+          <Button title="홈으로" onPress={handleFinish} />
+        ) : (
+          <InterpretationContainer style={styles.buttonRow}>
+            <Button title="모르는 문장 다시하기" onPress={handleRetryUnknown} />
+            <Button title="홈으로" onPress={handleFinish} />
+          </InterpretationContainer>
+        )}
+      </InterpretationContainer>
+    );
+  }
+
+  const handleToggleKorean = () => {
+    setShowKorean(prev => !prev);
   };
 
   return (
     <InterpretationContainer style={styles.container}>
-      <Text style={styles.number}>문제: {number}</Text>
-      <Text style={styles.progress}>{currentIndex + 1} / {sentences.length}</Text>
-
-      <Text style={styles.english}>{currentSentence.english}</Text>
-
-      {/* 해석 보기/숨기기 */}
-      {showKorean && (
-        <Text style={styles.korean}>{currentSentence.korean}</Text>
-      )}
-
-      <InterpretationContainer style={styles.buttonGroup}>
-        <Button
-          title={showKorean ? "해석 숨기기" : "해석 보기"}
-          onPress={() => setShowKorean(!showKorean)}
-        />
-      </InterpretationContainer>
-
-      {/* 학습 결과 버튼 */}
-      <InterpretationContainer style={styles.buttonRow}>
-        <Button title="✅ 알겠음" onPress={handleNext} />
-        <Button title="❌ 모르겠음" onPress={handleNext} />
-      </InterpretationContainer>
+      <View style={styles.card}>
+        <Text style={styles.index}>
+          {currentIndex + 1} / {sentences.length}
+        </Text>
+        <Text style={styles.word}>
+          {showKorean ? currentSentence.korean : currentSentence.english}
+        </Text>
+        <Button title={showKorean ? "영어로 보기" : "한국어로 보기"} onPress={handleToggleKorean} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="알겠음" onPress={handleKnow} />
+        <Button title="모르겠음" onPress={handleDontKnow} />
+      </View>
     </InterpretationContainer>
   );
 }
 
-// 스타일 정의
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, justifyContent: 'center', alignItems: 'center' },
-  number: { fontSize: 20, marginBottom: 10 },
-  progress: { fontSize: 16, color: '#777', marginBottom: 10 },
-  english: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  korean: { fontSize: 18, color: '#555', marginTop: 10, textAlign: 'center' },
-  buttonGroup: { marginVertical: 20 },
-  buttonRow: { flexDirection: 'row', gap: 20 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  index: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  word: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 16,
+  },
 });
