@@ -118,7 +118,7 @@ export default function VocabularyScreen({route, navigation}) {
         }
         // 이전 회독 시간 누적
         if (endTime && startTime) {
-            setTotalStudyTime(prev => prev + Math.floor((endTime - startTime) / 1000));
+            setTotalStudyTime(prev => prev + Math.floor((endTime - startTime) / 1000))
         }
         setWords(shuffleArray(unknownWords));
         setIndex(0);

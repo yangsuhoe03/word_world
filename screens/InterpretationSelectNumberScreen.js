@@ -46,6 +46,7 @@ export default function InterpretationSelectNumber({route, navigation}) {
   // 문제 번호 버튼 배열 생성 (41-42, 43-45는 묶어서 표시)
   const problemButtons = [];
   for (let i = 1; i <= 45; i++) {
+    if (i === 27 || i === 28) continue; // 27, 28번은 건너뜀
     if (i === 41) {
       problemButtons.push("41-42");
       i = 42;
