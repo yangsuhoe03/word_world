@@ -36,7 +36,7 @@ export default function MockTestDetailScreen({route, navigation}) {
                 <Button title="1. 어휘" onPress={() => handleNavigate('VocabularySelectRange')} />
                 <Button title="2. 해석" onPress={() => handleNavigate('InterpretationSelectNumber')} />
                 <Button title="3. 주제 외우기" onPress={() => handleNavigate('Topic')} />
-                <Button title="4. 어법 학습" onPress={() => handleNavigate('Grammar')} />
+                
             </MockTestDetailContainer>
         </MockTestDetailContainer>
     );
