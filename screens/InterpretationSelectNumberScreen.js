@@ -2,24 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { interpretationFileMap } from '../data/interpretationFileMap.js';
-// 이 화면은 사용자가 해석(문장 해석) 문제의 번호를 선택할 수 있도록 해주는 화면입니다. 원하는 문제 번호를 선택하여 해석 학습을 시작할 수 있습니다.
-
-// 파일 내 컨테이너 컴포넌트 정의
-function InterpretationSelectNumberContainer(props) {
-  const { style, scroll, children, ...rest } = props;
-  if (scroll) {
-    return (
-      <ScrollView contentContainerStyle={style} {...rest}>
-        {children}
-      </ScrollView>
-    );
-  }
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
+import Container from '../components/Container';
 
 export default function InterpretationSelectNumber({route, navigation}) {
     const year = route.params.year;
@@ -59,17 +42,17 @@ export default function InterpretationSelectNumber({route, navigation}) {
   }
 
   return (
-    <InterpretationSelectNumberContainer style={styles.container} scroll>
+    <Container style={styles.container} scroll>
       <Text style={styles.title}>해석할 문제 번호를 선택하세요</Text>
-      <InterpretationSelectNumberContainer style={styles.grid}>
+      <Container style={styles.grid}>
         {/* 문제 번호 버튼 렌더링 */}
         {problemButtons.map(number => (
           <TouchableOpacity key={number} style={styles.button} onPress={() => handleSelect(number)}>
             <Text style={styles.buttonText}>{number}</Text>
           </TouchableOpacity>
         ))}
-      </InterpretationSelectNumberContainer>
-    </InterpretationSelectNumberContainer>
+      </Container>
+    </Container>
   );
 }
 

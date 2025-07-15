@@ -2,16 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-
-// 파일 내 컨테이너 컴포넌트 정의
-function InterpretationContainer(props) {
-  const { style, children, ...rest } = props;  
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
+import Container from '../components/Container';
 
 export default function Interpretation({route, navigation}) {
   const { number, interpretations } = route.params || {};
@@ -50,9 +41,9 @@ export default function Interpretation({route, navigation}) {
   // 문장 데이터가 없을 때 로딩 안내
   if (sentences.length === 0) {
     return (
-      <InterpretationContainer style={styles.container}>
+      <Container style={styles.container}>
         <Text>문제 데이터를 불러오는 중입니다...</Text>
-      </InterpretationContainer>
+      </Container>
     );
   }
 
@@ -115,19 +106,19 @@ export default function Interpretation({route, navigation}) {
     const min = Math.floor(totalStudyTime / 60);
     const sec = totalStudyTime % 60;
     return (
-      <InterpretationContainer style={styles.container}>
+      <Container style={styles.container}>
         <Text style={styles.word}>회독 완료!</Text>
         <Text style={styles.number}>알고 있는 문장: {knownCount} / {sentences.length}</Text>
         <Text style={styles.number}>총 공부 시간: {min}분 {sec}초</Text>
         {unknown.length === 0 ? (
           <Button title="홈으로" onPress={handleFinish} />
         ) : (
-          <InterpretationContainer style={styles.buttonRow}>
+          <Container style={styles.buttonRow}>
             <Button title="모르는 문장 다시하기" onPress={handleRetryUnknown} />
             <Button title="홈으로" onPress={handleFinish} />
-          </InterpretationContainer>
+          </Container>
         )}
-      </InterpretationContainer>
+      </Container>
     );
   }
 
@@ -136,7 +127,7 @@ export default function Interpretation({route, navigation}) {
   };
 
   return (
-    <InterpretationContainer style={styles.container}>
+    <Container style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.index}>
           {currentIndex + 1} / {sentences.length}
@@ -150,7 +141,7 @@ export default function Interpretation({route, navigation}) {
         <Button title="알겠음" onPress={handleKnow} />
         <Button title="모르겠음" onPress={handleDontKnow} />
       </View>
-    </InterpretationContainer>
+    </Container>
   );
 }
 

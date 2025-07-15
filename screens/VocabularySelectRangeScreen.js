@@ -4,16 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordFileMap } from '../data/wordFileMap.js';
 import fallbackData from '../data/word_example100.json';
-
-// 파일 내 컨테이너 컴포넌트 정의
-function VocabularySelectRangeContainer(props) {
-  const { style, children, ...rest } = props;
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
+import Container from '../components/Container';
 
 export default function VocabularySelectRangeScreen({route, navigation}) {
     // const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
@@ -54,7 +45,7 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
     };
 
     return (
-        <VocabularySelectRangeContainer style={styles.container}>
+        <Container style={styles.container}>
             <Text style={styles.title}>어휘 회독 범위를 선택하세요</Text>
             {/* 1~50번 범위 선택 버튼 */}
             <TouchableOpacity style={styles.button} onPress={() => handleSelectRange('1-50')}>
@@ -64,7 +55,7 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
             <TouchableOpacity style={styles.button} onPress={() => handleSelectRange('1-100')}>
                 <Text style={styles.buttonText}>1 ~ 100번</Text>
             </TouchableOpacity>
-        </VocabularySelectRangeContainer>
+        </Container>
     );
 }
 

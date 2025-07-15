@@ -2,23 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-// 파일 내 컨테이너 컴포넌트 정의
-function HomeContainer(props) {
-  const { style, scroll, children, ...rest } = props;
-  if (scroll) {
-    return (
-      <ScrollView contentContainerStyle={style} {...rest}>
-        {children}
-      </ScrollView>
-    );
-  }
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
+import Container from '../components/Container';
 
 // 학년 선택을 위한 배열
 const grades = [1, 2, 3];
@@ -79,10 +63,10 @@ export default function HomeScreen() {
     });
 
   return (
-    <HomeContainer style={styles.container} scroll>
+    <Container style={styles.container} scroll>
       {/* 학년 선택 영역 */}
       <Text style={styles.title}>학년 선택</Text>
-      <HomeContainer style={styles.row}>
+      <Container style={styles.row}>
         {grades.map((grade) => (
           <TouchableOpacity
             key={grade}
@@ -95,10 +79,10 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>{grade}학년</Text>
           </TouchableOpacity>
         ))}
-      </HomeContainer>
+      </Container>
       {/* 연도 선택 영역 */}
       <Text style={styles.title}>연도 선택</Text>
-      <HomeContainer style={styles.row}>
+      <Container style={styles.row}>
         <TouchableOpacity
           style={[
             styles.selectButton,
@@ -120,7 +104,7 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>{year}년</Text>
           </TouchableOpacity>
         ))}
-      </HomeContainer>
+      </Container>
       {/* 필터링된 모의고사 리스트 영역 */}
       <Text style={styles.title}>모의고사 목록</Text>
       {selectedYears.length === 0 ? (
@@ -144,7 +128,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))
       )}
-    </HomeContainer>
+    </Container>
   );
 }
 

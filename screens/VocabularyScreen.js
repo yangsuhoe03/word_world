@@ -3,16 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import fallbackWords from '../data/word_example100.json'; // 기본 단어 데이터
+import Container from '../components/Container';
 
-// 파일 내 컨테이너 컴포넌트 정의
-function VocabularyContainer(props) {
-  const { style, children, ...rest } = props;
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
 function shuffleArray(array) {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -76,9 +68,9 @@ export default function VocabularyScreen({route, navigation}) {
     // 단어 데이터가 없을 때 로딩 안내
     if (words.length === 0) {
         return (
-            <VocabularyContainer style={styles.container}>
+            <Container style={styles.container}>
                 <Text>단어를 불러오는 중입니다...</Text>
-            </VocabularyContainer>
+            </Container>
         );
     }
 
@@ -135,7 +127,7 @@ export default function VocabularyScreen({route, navigation}) {
     };
 
     return (
-        <VocabularyContainer style={styles.container}>
+        <Container style={styles.container}>
             {isFinished ? (
                 (() => {
                     const unknownWords = words.filter(w => !w.isKnown);
@@ -172,10 +164,10 @@ export default function VocabularyScreen({route, navigation}) {
                             <Text style={styles.number}>
                                 총 공부 시간: {min}분 {sec}초
                             </Text>
-                            <VocabularyContainer style={styles.buttonRow}>
+                            <Container style={styles.buttonRow}>
                                 <Button title="모르는 단어만 다시 회독하기" onPress={handleRetryUnknown} />
                                 <Button title="홈으로" onPress={handleFinish} />
-                            </VocabularyContainer>
+                            </Container>
                         </>
                     );
                 })()
@@ -185,27 +177,27 @@ export default function VocabularyScreen({route, navigation}) {
                     <Text style={styles.number}>{index + 1} / {words.length}</Text>
                     <Text style={styles.word}>{word.word}</Text>
                     {showMeaning && (
-                        <VocabularyContainer style={styles.meaningBox}>
+                        <Container style={styles.meaningBox}>
                             <Text style={styles.meaning}>{word.meaning}</Text>
-                        </VocabularyContainer>
+                        </Container>
                     )}
                     <Text style={styles.example}>{word.example}</Text>
                     {showMeaning && (
-                        <VocabularyContainer style={styles.meaningBox}>
+                        <Container style={styles.meaningBox}>
                             <Text style={styles.exampleMeaning}>{word.examplemeaning}</Text>
-                        </VocabularyContainer>
+                        </Container>
                     )}
                     <Button
                         title={showMeaning ? "해석 숨기기" : "해석 보기"}
                         onPress={() => setShowMeaning(!showMeaning)}
                     />
-                    <VocabularyContainer style={styles.buttonRow}>
+                    <Container style={styles.buttonRow}>
                         <Button title="✅ 알고 있음" onPress={handleKnow} />
                         <Button title="❌ 모르겠음" onPress={handleDontKnow} />
-                    </VocabularyContainer>
+                    </Container>
                 </>
             )}
-        </VocabularyContainer>
+        </Container>
     );
 }
 

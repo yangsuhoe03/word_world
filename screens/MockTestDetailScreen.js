@@ -2,16 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-
-// 파일 내 컨테이너 컴포넌트 정의
-function MockTestDetailContainer(props) {
-  const { style, children, ...rest } = props;
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
+import Container from '../components/Container';
 
 export default function MockTestDetailScreen({route, navigation}) {
     // const route = useRoute(); // 라우트 파라미터 접근
@@ -26,19 +17,19 @@ export default function MockTestDetailScreen({route, navigation}) {
     };
 
     return (
-        <MockTestDetailContainer style={styles.container}>
+        <Container style={styles.container}>
             <Text style={styles.title}>📘 모의고사 상세 정보</Text>
             <Text style={styles.info}>🗓 {year}년 {month}월</Text>
             <Text style={styles.info}>🎓 {grade}학년</Text>
 
             {/* 학습 유형별 이동 버튼 */}
-            <MockTestDetailContainer style={styles.buttonContainer}>
+            <Container style={styles.buttonContainer}>
                 <Button title="1. 어휘" onPress={() => handleNavigate('VocabularySelectRange')} />
                 <Button title="2. 해석" onPress={() => handleNavigate('InterpretationSelectNumber')} />
                 <Button title="3. 주제 외우기" onPress={() => handleNavigate('Topic')} />
                 
-            </MockTestDetailContainer>
-        </MockTestDetailContainer>
+            </Container>
+        </Container>
     );
 }
 

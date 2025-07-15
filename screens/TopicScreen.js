@@ -3,24 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 // import topicData from '../data/topic_example.json'; // 더 이상 직접 import하지 않음
 import { topicFileMap } from '../data/topicFileMap';
+import Container from '../components/Container';
 
-
-// 파일 내 컨테이너 컴포넌트 정의
-function TopicContainer(props) {
-  const { style, scroll, children, ...rest } = props;
-  if (scroll) {
-    return (
-      <ScrollView contentContainerStyle={style} {...rest}>
-        {children}
-      </ScrollView>
-    );
-  }
-  return (
-    <View style={style} {...rest}>
-      {children}
-    </View>
-  );
-}
 
 // 배열을 랜덤하게 섞는 함수
 function shuffleArray(array) {
@@ -75,9 +59,9 @@ export default function TopicScreen({route, navigation}) {
   // topicData가 없거나 아직 로딩 중이면 안내
   if (!topicData || topicData.length === 0) {
     return (
-      <TopicContainer style={styles.container}>
+      <Container style={styles.container}>
         <Text>주제 데이터를 불러오는 중입니다...</Text>
-      </TopicContainer>
+      </Container>
     );
   }
 
@@ -145,38 +129,38 @@ export default function TopicScreen({route, navigation}) {
     if (unknownTopics.length === 0) {
       // 모두 알고 있음
       return (
-        <TopicContainer style={styles.container}>
+        <Container style={styles.container}>
           <Text style={styles.word}>회독 완료!</Text>
           <Text style={styles.number}>알고 있는 주제: {knownCount} / {topicData.length}</Text>
           <Text style={styles.number}>총 공부 시간: {min}분 {sec}초</Text>
           <Button title="홈으로" onPress={handleFinish} />
-        </TopicContainer>
+        </Container>
       );
     }
     // 모르는 주제가 있을 때
     return (
-      <TopicContainer style={styles.container}>
+      <Container style={styles.container}>
         <Text style={styles.word}>회독 완료!</Text>
         <Text style={styles.number}>알고 있는 주제: {knownCount} / {topicData.length}</Text>
         <Text style={styles.number}>총 공부 시간: {min}분 {sec}초</Text>
-        <TopicContainer style={styles.buttonRow}>
+        <Container style={styles.buttonRow}>
           <Button title="모르는 주제만 다시 회독하기" onPress={handleRetryUnknown} />
           <Button title="홈으로" onPress={handleFinish} />
-        </TopicContainer>
-      </TopicContainer>
+        </Container>
+      </Container>
     );
   }
 
   // 회독 중 UI
   return (
-    <TopicContainer style={styles.container} scroll>
+    <Container style={styles.container} scroll>
       <Text style={styles.number}>{index + 1} / {topicData.length}</Text>
       <Text style={styles.passage}>{current.passage}</Text>
       {/* 영어 주제 보기/숨기기 */}
       {showTopicEn && <Text style={styles.topicEn}>• {current.topic_en}</Text>}
       {/* 한글 주제 보기/숨기기 */}
       {showTopicKo && <Text style={styles.topicKo}>→ {current.topic_ko}</Text>}
-      <TopicContainer style={styles.topicButtons}>
+      <Container style={styles.topicButtons}>
         <Button
           title={showTopicEn ? "주제(영어) 숨기기" : "주제(영어)"}
           onPress={() => setShowTopicEn(!showTopicEn)}
@@ -185,12 +169,12 @@ export default function TopicScreen({route, navigation}) {
           title={showTopicKo ? "주제(한글) 숨기기" : "주제(한글)"}
           onPress={() => setShowTopicKo(!showTopicKo)}
         />
-      </TopicContainer>
-      <TopicContainer style={styles.buttonRow}>
+      </Container>
+      <Container style={styles.buttonRow}>
         <Button title="✅ 알고 있음" onPress={handleKnow} />
         <Button title="❌ 모르겠음" onPress={handleDontKnow} />
-      </TopicContainer>
-    </TopicContainer>
+      </Container>
+    </Container>
   );
 }
 
