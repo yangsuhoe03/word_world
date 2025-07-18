@@ -55,7 +55,7 @@ export default function HomeScreen() {
     }
   };
 
-  // 뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
+  //뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
   useEffect(() => {
     const onBackPress = () => {
       BackHandler.exitApp();
