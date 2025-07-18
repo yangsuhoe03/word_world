@@ -1,7 +1,7 @@
 // 이 화면은 모의고사(테스트) 상세 정보를 보여주는 화면입니다. 사용자가 선택한 모의고사 문제의 상세 내용과 풀이를 확인할 수 있습니다.
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import Container from '../components/Container';
 
 export default function MockTestDetailScreen({route, navigation}) {
@@ -10,6 +10,15 @@ export default function MockTestDetailScreen({route, navigation}) {
     const year = route.params.year;
     const month = route.params.month;
     const grade = route.params.grade;
+
+    // 뒤로가기(헤더/제스처/하드웨어) 시 무조건 홈으로 이동
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+            e.preventDefault();
+            navigation.navigate('Home');
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     // 각 학습 화면으로 이동하는 함수
     const handleNavigate = (screen) => {

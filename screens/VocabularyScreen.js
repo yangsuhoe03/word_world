@@ -1,9 +1,10 @@
 // 이 화면은 사용자가 단어 목록을 보고, 단어별로 상세 정보를 확인하거나 학습할 수 있도록 하는 단어장(어휘) 메인 화면입니다.
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import fallbackWords from '../data/word_example100.json'; // 기본 단어 데이터
 import Container from '../components/Container';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function shuffleArray(array) {
     const arr = [...array];
@@ -29,6 +30,9 @@ export default function VocabularyScreen({route, navigation}) {
         // 전달받은 단어 리스트와 범위
         const paramWords = route.params.words;
         const selectedRange = route.params.range;
+        const year = route.params.year;
+        const month = route.params.month;
+        const grade = route.params.grade;
 
         // 단어 데이터가 없으면 fallback 사용
         const baseWords = Array.isArray(paramWords) && paramWords.length > 0 ? paramWords : fallbackWords;
@@ -64,6 +68,21 @@ export default function VocabularyScreen({route, navigation}) {
             setTotalStudyTime(prev => prev + Math.floor((now - startTime) / 1000));
         }
     }, [isFinished, endTime, startTime]);
+
+    // 회독 완료 시 reviewCount 저장 (딱 한 번만)
+    useEffect(() => {
+        if (isFinished && endTime && words.length > 0) {
+            const unknownWords = words.filter(w => !w.isKnown);
+            if (unknownWords.length === 0) {
+
+                const elapsed = totalStudyTime;
+                console.log('increaseReviewCount', route.params.range, elapsed);
+                increaseReviewCount(route.params.range, elapsed);
+            }
+        }
+        // eslint-disable-next-line
+    }, [isFinished, endTime]);
+      
 
     // 단어 데이터가 없을 때 로딩 안내
     if (words.length === 0) {
@@ -126,6 +145,35 @@ export default function VocabularyScreen({route, navigation}) {
         navigation.navigate('Home');
     };
 
+    // 회독 횟수 증가 함수 (연도/월/학년/범위별 저장)
+    const increaseReviewCount = async (range, elapsedSeconds) => {
+        try {
+        const year = route.params.year;
+        const month = route.params.month;
+        const grade = route.params.grade;
+        const key = `${year}_${String(month).padStart(2, '0')}_${grade}`;
+        const data = await AsyncStorage.getItem('reviewInfo');
+        let reviewInfo = data ? JSON.parse(data) : {};
+        if (!reviewInfo[key]) {
+          reviewInfo[key] = {};
+        }
+        if (!reviewInfo[key][range]) {
+          reviewInfo[key][range] = { reviewCount: 0, reviewTimes: [] };
+        }
+        reviewInfo[key][range].reviewCount += 1;
+        reviewInfo[key][range].lastReviewDate = new Date().toISOString();
+        // 회독별로 seconds, date(YYYY-MM-DD) 저장
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        reviewInfo[key][range].reviewTimes.push({ seconds: elapsedSeconds, date: dateStr });
+        await AsyncStorage.setItem('reviewInfo', JSON.stringify(reviewInfo));
+      } catch (e) {
+        console.error('회독 정보 저장 실패:', e);
+      }
+    };
+
+
+
     return (
         <Container style={styles.container}>
             {isFinished ? (
@@ -139,6 +187,7 @@ export default function VocabularyScreen({route, navigation}) {
                     const sec = elapsed % 60;
 
                     if (unknownWords.length === 0) {
+                        // 마지막 회독 시간 계산
                         return (
                             <>
                                 <Text style={styles.word}>회독 완료!</Text>
@@ -211,4 +260,17 @@ const styles = StyleSheet.create({
     example: { fontSize: 16, fontStyle: 'italic' },
     exampleMeaning: { fontSize: 16, marginTop: 4, color: '#555' },
     buttonRow: { flexDirection: 'row', gap: 20 },
+    button: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 10,
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
 });

@@ -1,6 +1,6 @@
 // 이 화면은 앱의 메인 홈 화면으로, 다양한 학습 메뉴(단어장, 해석, 모의고사 등)로 이동할 수 있는 네비게이션 역할을 합니다.
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Container from '../components/Container';
 
@@ -23,6 +23,16 @@ const mockTests = [
 
 export default function HomeScreen() {
   const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
+
+  // 뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
+  useEffect(() => {
+    const onBackPress = () => {
+      BackHandler.exitApp();
+      return true;
+    };
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, []);
 
   // 선택된 학년 상태 (초기값: 선택 안함)
   const [selectedGrade, setSelectedGrade] = useState(null);
