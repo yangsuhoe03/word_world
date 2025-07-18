@@ -56,14 +56,14 @@ export default function HomeScreen() {
   };
 
   //뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
-  useEffect(() => {
-    const onBackPress = () => {
-      BackHandler.exitApp();
-      return true;
-    };
-    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    return () => subscription.remove();
-  }, []);
+  // useEffect(() => {
+  //   const onBackPress = () => {
+  //     BackHandler.exitApp();
+  //     return true;
+  //   };
+  //   const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  //   return () => subscription.remove();
+  // }, []);
 
   // 선택된 학년 상태 (초기값: 선택 안함)
   const [selectedGrade, setSelectedGrade] = useState(null);
