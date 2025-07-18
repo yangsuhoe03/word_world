@@ -1,10 +1,11 @@
 // 이 화면은 모의고사(테스트) 상세 정보를 보여주는 화면입니다. 사용자가 선택한 모의고사 문제의 상세 내용과 풀이를 확인할 수 있습니다.
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Container from '../components/Container';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function MockTestDetailScreen({route, navigation}) {
+export default function MockTestDetailScreen({ route, navigation }) {
     // const route = useRoute(); // 라우트 파라미터 접근
     // const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
     const year = route.params.year;
@@ -15,6 +16,18 @@ export default function MockTestDetailScreen({route, navigation}) {
     const handleNavigate = (screen) => {
         navigation.navigate(screen, { year, month, grade }); // 학습 화면으로 이동
     };
+    useEffect(() => {
+        const saveRecent = async () => {
+            const recentTest = { year, month, grade };
+            try {
+                await AsyncStorage.setItem('recentMockTest', JSON.stringify(recentTest));
+            } catch (e) {
+                console.error('최근 학습 저장 오류:', e);
+            }
+        };
+
+        saveRecent();
+    }, []);
 
     return (
         <Container style={styles.container}>
@@ -27,7 +40,7 @@ export default function MockTestDetailScreen({route, navigation}) {
                 <Button title="1. 어휘" onPress={() => handleNavigate('VocabularySelectRange')} />
                 <Button title="2. 해석" onPress={() => handleNavigate('InterpretationSelectNumber')} />
                 <Button title="3. 주제 외우기" onPress={() => handleNavigate('Topic')} />
-                
+
             </Container>
         </Container>
     );

@@ -1,8 +1,9 @@
 // 이 화면은 앱의 메인 홈 화면으로, 다양한 학습 메뉴(단어장, 해석, 모의고사 등)로 이동할 수 있는 네비게이션 역할을 합니다.
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Container from '../components/Container';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 학년 선택을 위한 배열
 const grades = [1, 2, 3];
@@ -23,6 +24,36 @@ const mockTests = [
 
 export default function HomeScreen() {
   const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
+  const [recentTest, setRecentTest] = useState(null);
+
+  useEffect(() => {
+    const loadRecentTest = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('recentMockTest');
+        if (jsonValue != null) {
+          setRecentTest(JSON.parse(jsonValue));
+        } else {
+          setRecentTest(null);
+        }
+      } catch (e) {
+        console.error('최근 학습 로딩 오류:', e);
+        setRecentTest(null);
+      }
+    };
+
+    loadRecentTest();
+  }, []);
+  const handleGoToRecent = () => {
+    if (recentTest) {
+      navigation.navigate('MockTestDetail', {
+        year: recentTest.year,
+        month: recentTest.month,
+        grade: recentTest.grade,
+      });
+    } else {
+      Alert.alert('알림', '최근 학습한 모의고사가 없습니다.');
+    }
+  };
 
   // 선택된 학년 상태 (초기값: 선택 안함)
   const [selectedGrade, setSelectedGrade] = useState(null);
@@ -128,7 +159,21 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))
       )}
+      <TouchableOpacity
+        style={[styles.testCard, { backgroundColor: '#2196F3' }]}
+        onPress={handleGoToRecent}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+          ⏪ 최근 학습한 모의고사로 가기
+        </Text>
+        <Text style={{ color: '#fff', marginTop: 4 }}>
+          {recentTest
+            ? `${recentTest.year}년 ${recentTest.month}월 ${recentTest.grade}학년 바로가기`
+            : '최근 학습이 없습니다.'}
+        </Text>
+      </TouchableOpacity>
     </Container>
+
   );
 }
 
