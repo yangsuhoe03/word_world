@@ -1,6 +1,6 @@
 // 이 화면은 사용자가 단어 학습 범위를 선택할 수 있도록 도와주는 화면입니다. 예를 들어, 특정 범위의 단어만 골라서 학습할 수 있습니다.
 import React, { useEffect, useState, useLayoutEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler, Button } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler, Button, Modal } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordFileMap } from '../data/wordFileMap.js';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,9 @@ import Container from '../components/Container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function VocabularySelectRangeScreen({route, navigation}) {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedReviewTimes, setSelectedReviewTimes] = useState([]);
+    const [selectedRangeLabel, setSelectedRangeLabel] = useState('');
     // const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
     // const route = useRoute(); // 라우트 파라미터 접근
     // const { year, month, grade } = route.params || {}; // 전달받은 연도, 월, 학년
@@ -94,30 +97,51 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
             {ranges.map(rangeObj => {
                 const rangeData = infoForKey[rangeObj.value];
                 return (
-                    <TouchableOpacity
-                        key={rangeObj.value}
-                        style={styles.button}
-                        onPress={() => handleSelectRange(rangeObj.value)}
-                    >
-                        <Text style={styles.buttonText}>
-                            {rangeObj.label} {rangeData && rangeData.reviewCount > 0
-                                ? `(${rangeData.reviewCount}회, 최근: ${
-                                    rangeData.reviewTimes.length > 0
-                                      ? `${Math.floor(rangeData.reviewTimes.slice(-1)[0].seconds/60)}분 ${rangeData.reviewTimes.slice(-1)[0].seconds%60}초 (${rangeData.reviewTimes.slice(-1)[0].date})`
-                                      : ''
-                                  })`
-                                : ''}
-                        </Text>
-                        {rangeData && rangeData.reviewTimes && rangeData.reviewTimes.length > 0 && (
-                            rangeData.reviewTimes.map((t, idx) => (
-                                <Text key={idx} style={{color: '#fff', fontSize: 13}}>
+                    <View key={rangeObj.value} style={{width: '100%', alignItems: 'center'}}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => handleSelectRange(rangeObj.value)}
+                            >
+                            <Text style={styles.buttonText}>
+                                {rangeObj.label}
+                            </Text>
+                        <Button
+                            title="회독 기록 보기"
+                            color="#888"
+                            onPress={() => {
+                                setSelectedReviewTimes(rangeData && rangeData.reviewTimes ? rangeData.reviewTimes : []);
+                                setSelectedRangeLabel(rangeObj.label);
+                                setModalVisible(true);
+                            }}
+                        />
+                        </TouchableOpacity>
+
+
+                    </View>
+                );
+            })}
+            <Modal
+                visible={modalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.5)'}}>
+                    <View style={{backgroundColor:'#333', padding:24, borderRadius:16, minWidth:280}}>
+                        <Text style={{color:'#fff', fontSize:18, marginBottom:12}}>{selectedRangeLabel} 회독 기록</Text>
+                        {selectedReviewTimes.length === 0 ? (
+                            <Text style={{color:'#fff'}}>회독 기록이 없습니다.</Text>
+                        ) : (
+                            selectedReviewTimes.map((t, idx) => (
+                                <Text key={idx} style={{color:'#fff', fontSize:15, marginBottom:4}}>
                                     {idx+1}회독: {Math.floor(t.seconds/60)}분 {t.seconds%60}초 ({t.date})
                                 </Text>
                             ))
                         )}
-                    </TouchableOpacity>
-                );
-            })}
+                        <Button title="닫기" onPress={() => setModalVisible(false)} color="#4CAF50" />
+                    </View>
+                </View>
+            </Modal>
             {/* 회독 정보 초기화 버튼 */}
             <TouchableOpacity style={[styles.button, {backgroundColor: 'red'}]} onPress={clearReviewInfo}>
                 <Text style={styles.buttonText}>회독 정보 초기화</Text>
