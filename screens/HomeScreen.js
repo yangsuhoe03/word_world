@@ -62,6 +62,9 @@ export default function HomeScreen() {
       return a.month - b.month; // 월 오름차순 정렬
     });
 
+
+
+
   return (
     <Container style={styles.container} scroll>
       {/* 학년 선택 영역 */}

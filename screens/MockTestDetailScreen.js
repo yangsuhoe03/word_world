@@ -1,7 +1,7 @@
 // 이 화면은 모의고사(테스트) 상세 정보를 보여주는 화면입니다. 사용자가 선택한 모의고사 문제의 상세 내용과 풀이를 확인할 수 있습니다.
-import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import React, { useLayoutEffect } from 'react';
+import { View, Text, StyleSheet, Button, BackHandler } from 'react-native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import Container from '../components/Container';
 
 export default function MockTestDetailScreen({route, navigation}) {
@@ -15,6 +15,40 @@ export default function MockTestDetailScreen({route, navigation}) {
     const handleNavigate = (screen) => {
         navigation.navigate(screen, { year, month, grade }); // 학습 화면으로 이동
     };
+
+    
+    useFocusEffect(
+        React.useCallback(() => {
+          const onBackPress = () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            });
+            return true;
+          };
+          const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+          return () => subscription.remove();
+        }, [navigation])
+      );
+    
+      // 헤더 뒤로가기 버튼도 홈으로 이동
+      useLayoutEffect(() => {
+        navigation.setOptions({
+          headerLeft: () => (
+            <Button
+              title="뒤로"
+              onPress={() => {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home' }],
+                });
+              }}
+            />
+          ),
+        });
+      }, [navigation]);
+    
+
 
     return (
         <Container style={styles.container}>

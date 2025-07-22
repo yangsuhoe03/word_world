@@ -1,8 +1,9 @@
 // 이 화면은 사용자가 단어 학습 범위를 선택할 수 있도록 도와주는 화면입니다. 예를 들어, 특정 범위의 단어만 골라서 학습할 수 있습니다.
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler, Button } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordFileMap } from '../data/wordFileMap.js';
+import { useFocusEffect } from '@react-navigation/native';
 import fallbackData from '../data/word_example100.json';
 import Container from '../components/Container';
 
@@ -43,6 +44,9 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
             words: wordList,
         });
     };
+
+
+
 
     return (
         <Container style={styles.container}>
