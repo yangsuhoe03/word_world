@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import Container from '../components/Container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -104,6 +105,19 @@ export default function HomeScreen() {
     });
 
 
+    
+  // 안드로이드 하드웨어 백버튼 처리
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        BackHandler.exitApp(); // 홈 화면에서 뒤로가기 시 앱 종료
+        return true;
+      };
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [])
+  );
+
 
 
   return (
@@ -189,6 +203,7 @@ export default function HomeScreen() {
 
   );
 }
+
 
 // 스타일 정의
 const styles = StyleSheet.create({
