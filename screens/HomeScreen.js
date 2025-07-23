@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import Container from '../components/Container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { normalize } from '../utils/normalize';
 
 // 학년 선택을 위한 배열
 const grades = [1, 2, 3];
@@ -130,11 +131,15 @@ export default function HomeScreen() {
             key={grade}
             style={[
               styles.selectButton,
-              selectedGrade === grade && styles.selectedButton,
+              selectedGrade === grade && styles.selectedButton1,
             ]}
             onPress={() => setSelectedGrade(grade)} // 학년 버튼 클릭 시 해당 학년 선택
           >
-            <Text style={styles.buttonText}>{grade}학년</Text>
+            <Text style={[
+              styles.buttonText,
+              selectedGrade === grade && styles.selectedButtonText,
+              ]}>
+                {grade}학년</Text>
           </TouchableOpacity>
         ))}
       </Container>
@@ -144,7 +149,7 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={[
             styles.selectButton,
-            isAllSelected && styles.selectedButton,
+            isAllSelected && styles.selectedButton2,
           ]}
           onPress={handleToggleAllYears} // 전체 선택/해제 버튼
         >
@@ -155,7 +160,7 @@ export default function HomeScreen() {
             key={year}
             style={[
               styles.selectButton,
-              selectedYears.includes(year) && styles.selectedButton,
+              selectedYears.includes(year) && styles.selectedButton2,
             ]}
             onPress={() => toggleYear(year)} // 연도 버튼 클릭 시 해당 연도 선택/해제
           >
@@ -208,19 +213,27 @@ export default function HomeScreen() {
 // 스타일 정의
 const styles = StyleSheet.create({
   container: { padding: 20, alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: 'bold', marginVertical: 10 },
+  title: { fontSize: normalize(26), fontWeight: 'bold', marginVertical: 10 },
   row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
   selectButton: {
-    backgroundColor: '#ddd',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderWidth: normalize(1.7),
+    borderColor: '#CFCFCF',
+    borderRadius: normalize(21.5),
     margin: 5,
   },
-  selectedButton: {
-    backgroundColor: '#4CAF50',
+  selectedButton1: {
+    backgroundColor: '#78BFB8',
+    borderWidth: 0,
+  },
+  selectedButton2: {
+    borderColor: '#78BFB8',
   },
   buttonText: { color: '#000' },
+  selectedButtonText: {
+    color: '#FFFFFF'
+  },
   testCard: {
     backgroundColor: '#f2f2f2',
     padding: 12,
