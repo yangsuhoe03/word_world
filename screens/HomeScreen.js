@@ -1,6 +1,8 @@
 // 이 화면은 앱의 메인 홈 화면으로, 다양한 학습 메뉴(단어장, 해석, 모의고사 등)로 이동할 수 있는 네비게이션 역할을 합니다.
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler, Alert } from 'react-native';
+import { SafeAreaView, Dimensions, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 최근학습 버튼이 네비게이션 바에 가리지 않게 안전영역 적용
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -20,9 +22,12 @@ const mockTests = [
   { year: 2021, month: 9, grade: 3 },
 ];
 
+const windowHeight = Dimensions.get('window').height;
+
 export default function HomeScreen() {
   const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
   const [recentTest, setRecentTest] = useState(null);
+  const insets = useSafeAreaInsets ? useSafeAreaInsets() : { bottom: 0 }; // 하단 안전영역 확보
 
   useEffect(() => {
     const loadRecentTest = async () => {
@@ -52,16 +57,6 @@ export default function HomeScreen() {
       Alert.alert('알림', '최근 학습한 모의고사가 없습니다.');
     }
   };
-
-  //뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
-  // useEffect(() => {
-  //   const onBackPress = () => {
-  //     BackHandler.exitApp();
-  //     return true;
-  //   };
-  //   const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-  //   return () => subscription.remove();
-  // }, []);
 
   // 선택된 학년 상태 (초기값: 선택 안함)
   const [selectedGrade, setSelectedGrade] = useState('1');
@@ -96,92 +91,101 @@ export default function HomeScreen() {
 
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.title}>학년 선택</Text>
-        <View style={styles.buttonGroup}>
-          {grades.map((grade) => (
-            <TouchableOpacity
-              key={grade}
-              style={[
-                styles.button,
-                String(selectedGrade) === String(grade) && styles.selectedButton,
-              ]}
-              onPress={() => setSelectedGrade(grade)}
-            >
-              <Text
+    <SafeAreaView style={styles.safeArea}> 
+      <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 120 + (insets.bottom || 0)}}> 
+        <View style={[styles.section, styles.firstSection]}> 
+          <Text style={styles.title}>학년 선택</Text>
+          <View style={styles.buttonGroup}>
+            {grades.map((grade) => (
+              <TouchableOpacity
+                key={grade}
                 style={[
-                  styles.buttonText,
-                  String(selectedGrade) === String(grade) && styles.selectedButtonText,
+                  styles.button,
+                  String(selectedGrade) === String(grade) && styles.selectedButton,
                 ]}
+                onPress={() => setSelectedGrade(grade)}
               >
-                {grade}학년
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.buttonText,
+                    String(selectedGrade) === String(grade) && styles.selectedButtonText,
+                  ]}
+                >
+                  {grade}학년
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.title}>연도 선택</Text>
-        <View style={styles.yearButtonGroup}>
-          {years.map((year) => (
-            <TouchableOpacity
-              key={year}
-              style={[
-                styles.yearButton,
-                String(selectedYear) === String(year) && styles.selectedYearButton,
-              ]}
-              onPress={() => setSelectedYear(year)}
-            >
-              <Text
+        <View style={styles.section}>
+          <Text style={styles.title}>연도 선택</Text>
+          <View style={styles.yearButtonGroup}>
+            {years.map((year) => (
+              <TouchableOpacity
+                key={year}
                 style={[
-                  styles.yearButtonText,
-                  String(selectedYear) === String(year) && styles.selectedYearButtonText,
+                  styles.yearButton,
+                  String(selectedYear) === String(year) && styles.selectedYearButton,
                 ]}
+                onPress={() => setSelectedYear(year)}
               >
-                {String(year) === 'all' ? '전체선택' : `${year}년`}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.yearButtonText,
+                    String(selectedYear) === String(year) && styles.selectedYearButtonText,
+                  ]}
+                >
+                  {String(year) === 'all' ? '전체선택' : `${year}년`}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.title}>모의고사 목록</Text>
-        <View style={styles.listContainer}>
-          {filteredTests.map((test, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.listItem}
-              onPress={() =>
-                navigation.navigate('MockTestDetail', {
-                  year: test.year,
-                  month: test.month,
-                  grade: test.grade,
-                })
-              }
-            >
-              <Text style={styles.listItemText}>
-                {test.year}년 {test.month}월 - {test.grade}학년 모의고사
-              </Text>
-              <Text style={styles.arrow}>&gt;</Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.section}>
+          <Text style={styles.title}>모의고사 목록</Text>
+          <View style={{maxHeight: windowHeight * 0.35}}> 
+            <ScrollView style={styles.listContainer}>
+              {filteredTests.map((test, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.listItem}
+                  onPress={() =>
+                    navigation.navigate('MockTestDetail', {
+                      year: test.year,
+                      month: test.month,
+                      grade: test.grade,
+                    })
+                  }
+                >
+                  <Text style={styles.listItemText}>
+                    {test.year}년 {test.month}월 - {test.grade}학년 모의고사
+                  </Text>
+                  <Text style={styles.arrow}>&gt;</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
-      </View>
-
-      <TouchableOpacity style={styles.recentButton} onPress={handleGoToRecent}>
-        <Text style={styles.recentButtonText}>최근학습</Text>
-        <Text style={styles.arrow}>&gt;</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={[styles.recentButtonWrapper, { bottom: 20 + (insets.bottom || 0) }] }> 
+          <TouchableOpacity style={styles.recentButton} onPress={handleGoToRecent}>
+            <Text style={styles.recentButtonText}>최근학습</Text>
+            <Text style={styles.arrow}>&gt;</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 
 // 스타일 정의
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f2f2f2',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f2f2f2',
@@ -189,6 +193,9 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 30,
+  },
+  firstSection: {
+    marginTop: 30,
   },
   title: {
     fontSize: 22,
@@ -277,6 +284,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: '600',
+  },
+  recentButtonWrapper: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 20,
   },
 });
 
