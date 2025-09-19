@@ -1,21 +1,35 @@
-
-// InterpretationSelectNumberScreen 컴포넌트
-// - 해석 연습 단어 개수 선택 화면의 메인 컴포넌트입니다.
-// - 사용자가 원하는 단어 개수를 선택하면 해석 연습 화면으로 이동합니다.
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { interpretationFileMap } from '../data/interpretationFileMap.js';
+import Container from '../components/Container';
 
-export default function InterpretationSelectNumber() {
-  const navigation = useNavigation();
+export default function InterpretationSelectNumber({route, navigation}) {
+    const year = route.params.year;
+    const month = route.params.month;
+    const grade = route.params.grade;
 
+    const [interpretationData, setInterpretationData] = useState(null);
+
+    useEffect(() => {
+        // key 예시: 2024_03_3
+        const key = `${year}_${String(month).padStart(2, '0')}_${grade}`; // 파일명 규칙에 맞게 key 생성
+        const data = interpretationFileMap[key]; // 해당 key로 해석 데이터 찾기
+        setInterpretationData(data);
+    }, [year, month, grade]);
+
+  // 문제 번호 선택 시 Interpretation 화면으로 이동
   const handleSelect = (number) => {
-    navigation.navigate('Interpretation', { number });
+    navigation.navigate('Interpretation', {
+      number,
+      interpretations: interpretationData,
+    });
   };
 
+  // 문제 번호 버튼 배열 생성 (18번부터, 41-42, 43-45는 묶어서 표시)
   const problemButtons = [];
-  for (let i = 1; i <= 45; i++) {
+  for (let i = 18; i <= 45; i++) {
+    if (i === 27 || i === 28) continue; // 27, 28번은 건너뜀
     if (i === 41) {
       problemButtons.push("41-42");
       i = 42;
@@ -28,19 +42,21 @@ export default function InterpretationSelectNumber() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <Container style={styles.container} scroll>
       <Text style={styles.title}>해석할 문제 번호를 선택하세요</Text>
-      <View style={styles.grid}>
+      <Container style={styles.grid}>
+        {/* 문제 번호 버튼 렌더링 */}
         {problemButtons.map(number => (
           <TouchableOpacity key={number} style={styles.button} onPress={() => handleSelect(number)}>
             <Text style={styles.buttonText}>{number}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-    </ScrollView>
+      </Container>
+    </Container>
   );
 }
 
+// 스타일 정의
 const styles = StyleSheet.create({
   container: { padding: 20, alignItems: 'center' },
   title: { fontSize: 18, marginBottom: 20 },

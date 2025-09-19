@@ -3,7 +3,7 @@ const path = require("path");
 const csv = require("csv-parser");
 
 const inputFilePath = path.join(__dirname, "word_template.csv");
-const outputFilePath = path.join(__dirname, "word_data.json");
+const outputFilePath = path.join(__dirname, "./data/word/2025_03_1_word.json");
 
 const results = [];
 
@@ -22,7 +22,8 @@ results.push({
     word: data.word.trim(),
     meaning: data.meaning.trim(),
     example: data.example.trim(),
-    examplemeaning: data.examplemeaning.trim()
+    examplemeaning: data.examplemeaning.trim(),
+    isKnown: false, // 기본값 false로 설정
 });
 })
 .on("end", () => {

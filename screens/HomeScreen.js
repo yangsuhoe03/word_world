@@ -1,55 +1,111 @@
-// HomeScreen 컴포넌트
-// - 학년/연도 선택 및 모의고사 목록 필터링, 상세 화면 이동을 담당합니다.
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+// 이 화면은 앱의 메인 홈 화면으로, 다양한 학습 메뉴(단어장, 해석, 모의고사 등)로 이동할 수 있는 네비게이션 역할을 합니다.
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler, Alert, Image, FlatList } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { normalize } from '../utils/normalize';
+import { problemFileMap } from '../data/problemFileMap';
 
-const grades = [1, 2, 3];
-const years = [2025, 2024, 2023, 2022, 2021];
+// 학년 선택을 위한 배열
+const grades = ['1', '2', '3'];
+const years = ['all', '2025', '2024', '2023', '2022', '2021'];
+const plusIcon = require('../assets/icons/plus.png');
+const checkIcon = require('../assets/icons/check.png');
 
-const mockTests = [
-  { year: 2025, month: 3, grade: 1 },
-  { year: 2025, month: 6, grade: 1 },
-  { year: 2024, month: 3, grade: 1 },
-  { year: 2024, month: 6, grade: 2 },
-  { year: 2024, month: 9, grade: 2 },
-  { year: 2023, month: 3, grade: 3 },
-  { year: 2022, month: 6, grade: 3 },
-  { year: 2021, month: 9, grade: 3 },
-];
+const mockTests = Object.keys(problemFileMap).map(
+  key => {
+    const [year, month, grade] = key.split('_').map(
+      Number);
+    return { year, month, grade };
+  });
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
+  const [recentTest, setRecentTest] = useState(null);
 
-  const [selectedGrade, setSelectedGrade] = useState(null);
-  const [selectedYears, setSelectedYears] = useState([2025]); // 기본값: 2025년만 선택
+  useEffect(() => {
+    const loadRecentTest = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('recentMockTest');
+        if (jsonValue != null) {
+          setRecentTest(JSON.parse(jsonValue));
+        } else {
+          setRecentTest(null);
+        }
+      } catch (e) {
+        console.error('최근 학습 로딩 오류:', e);
+        setRecentTest(null);
+      }
+    };
 
-  // toggleYear 함수
-  // - 연도 버튼 클릭 시 해당 연도의 선택/해제를 토글합니다.
-  const toggleYear = (year) => {
-    if (selectedYears.includes(year)) {
-      setSelectedYears(selectedYears.filter((y) => y !== year));
+    loadRecentTest();
+  }, []);
+  const handleGoToRecent = () => {
+    if (recentTest) {
+      navigation.navigate('MockTestDetail', {
+        year: recentTest.year,
+        month: recentTest.month,
+        grade: recentTest.grade,
+      });
     } else {
-      setSelectedYears([...selectedYears, year]);
+      Alert.alert('알림', '최근 학습한 모의고사가 없습니다.');
     }
   };
 
-  const isAllSelected = years.every((y) => selectedYears.includes(y));
+  //뒤로가기(하드웨어/제스처) 시 무조건 앱 종료
+  // useEffect(() => {
+  //   const onBackPress = () => {
+  //     BackHandler.exitApp();
+  //     return true;
+  //   };
+  //   const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  //   return () => subscription.remove();
+  // }, []);
 
-  // handleToggleAllYears 함수
-  // - 전체 선택 버튼 클릭 시 모든 연도의 선택/해제를 토글합니다.
-  const handleToggleAllYears = () => {
-    if (isAllSelected) {
-      setSelectedYears([]); // 전체 해제
-    } else {
-      setSelectedYears([...years]); // 전체 선택
+  // 선택된 학년 상태 (초기값: 선택 안함)
+  const [selectedGrade, setSelectedGrade] = useState('1');
+  const [selectedYears, setSelectedYears] = useState(['all']);
+
+  const handleYearSelect = (year) => {
+    const allIndividualYears = years.slice(1);
+
+    if (year === 'all') {
+      setSelectedYears(prev => {
+        // If 'all' is selected, deselect all. Otherwise, select 'all'.
+        if (prev.includes('all')) {
+          return [];
+        } else {
+          return ['all'];
+        }
+      });
+      return;
     }
+
+    // Logic for individual year clicks
+    setSelectedYears(prev => {
+      const newYears = prev.includes('all') ? [] : [...prev];
+
+      if (newYears.includes(year)) {
+        // remove it
+        const nextYears = newYears.filter(y => y !== year);
+        return nextYears;
+      } else {
+        // add it
+        const nextYears = [...newYears, year];
+        // If adding this year means all years are now selected, collapse to ['all']
+        if (nextYears.length === allIndividualYears.length) {
+          return ['all'];
+        }
+        return nextYears;
+      }
+    });
   };
 
+  // 선택된 학년과 연도에 따라 모의고사 리스트를 필터링한 결과
   const filteredTests = mockTests
     .filter((test) => {
-      const matchGrade = selectedGrade === null || test.grade === selectedGrade;
-      const matchYear = selectedYears.includes(test.year);
+      const matchGrade = selectedGrade === 'all' || String(test.grade) === selectedGrade;
+      const matchYear = selectedYears.includes('all') || selectedYears.includes(String(test.year));
       return matchGrade && matchYear;
     })
     .sort((a, b) => {
@@ -57,100 +113,282 @@ export default function HomeScreen() {
       return a.month - b.month;
     });
 
+
+
+  // 안드로이드 하드웨어 백버튼 처리
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        BackHandler.exitApp(); // 홈 화면에서 뒤로가기 시 앱 종료
+        return true;
+      };
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [])
+  );
+
+
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* 학년 선택 */}
-      <Text style={styles.title}>학년 선택</Text>
-      <View style={styles.row}>
-        {grades.map((grade) => (
-          <TouchableOpacity
-            key={grade}
-            style={[
-              styles.selectButton,
-              selectedGrade === grade && styles.selectedButton,
-            ]}
-            onPress={() => setSelectedGrade(grade)}
-          >
-            <Text style={styles.buttonText}>{grade}학년</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+    <View style={{ flex: 1, backgroundColor: '#f2f2f2' }}>
+      <TouchableOpacity
+        style={styles.settingsButton}
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <Image source={require('../assets/icons/setting.png')} style={styles.settingsIcon} />
+      </TouchableOpacity>
 
-      {/* 연도 선택 */}
-      <Text style={styles.title}>연도 선택</Text>
-      <View style={styles.row}>
-        <TouchableOpacity
-          style={[
-            styles.selectButton,
-            isAllSelected && styles.selectedButton,
-          ]}
-          onPress={handleToggleAllYears}
-        >
-          <Text style={styles.buttonText}>전체 선택</Text>
+      <ScrollView style={styles.container}>
+        <View style={styles.section}>
+          <Text style={styles.title}>학년 선택</Text>
+          <View style={styles.buttonGroup}>
+            {grades.map((grade) => (
+              <TouchableOpacity
+                key={grade}
+                style={[
+                  styles.button,
+                  String(selectedGrade) === String(grade) && styles.selectedButton,
+                ]}
+                onPress={() => setSelectedGrade(grade)}
+              >
+                <Text
+                  style={[
+                    styles.buttonText,
+                    String(selectedGrade) === String(grade) && styles.selectedButtonText,
+                  ]}
+                >
+                  {grade}학년
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.title}>연도 선택</Text>
+          <View style={styles.yearButtonGroup}>
+            {years.map((year) => {
+              const isAllButton = year === 'all';
+
+              let isSelected;
+              if (isAllButton) {
+                isSelected = selectedYears.includes('all');
+              } else {
+                isSelected = selectedYears.includes('all') || selectedYears.includes(String(year));
+              }
+
+              const isAllSelectedForStyling = isAllButton && isSelected;
+
+              return (
+                <TouchableOpacity
+                  key={year}
+                  style={[
+                    styles.yearButton,
+                    isSelected && !isAllButton && styles.selectedYearButton,
+                    isAllSelectedForStyling && styles.allSelectedButton,
+                  ]}
+                  onPress={() => handleYearSelect(year)}
+                >
+                  <View style={styles.rowWrapper}>
+                    {!isAllButton && (
+                      <Image
+                        source={isSelected ? checkIcon : plusIcon}
+                        style={[
+                          isSelected ? styles.checkIcon : styles.plusIcon,
+                        ]}
+                        resizeMode="contain"
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.yearButtonText,
+                        isSelected && !isAllButton && styles.selectedYearButtonText,
+                        isAllSelectedForStyling && styles.allSelectedButtonText,
+                      ]}
+                    >
+                      {isAllButton ? (isSelected ? ' 선택해제 ' : ' 전체선택 ') : `${year}년`}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.title}>모의고사 목록</Text>
+          {/* 기존의 View와 .map()을 FlatList 하나로 교체 */}
+          <FlatList
+            style={styles.listContainer} // 고정된 박스 스타일(높이, 배경색 등)을 여기에 적용
+            data={filteredTests}
+            // 각 항목에 고유한 키를 부여 (index보다 데이터 고유값으로 만드는 게 더 안정적)
+            keyExtractor={(item, index) => `${item.year}-${item.month}-${item.grade}-${index}`}
+            // 각 항목을 어떻게 그릴지 정의 (.map() 안의 내용을 그대로 옮기면 됨)
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.listItem}
+                onPress={() =>
+                  navigation.navigate('MockTestDetail', {
+                    year: item.year,
+                    month: item.month,
+                    grade: item.grade,
+                  })
+                }
+              >
+                <Text style={styles.listItemText}>
+                  {item.year}년 {item.month}월 - {item.grade}학년 모의고사
+                </Text>
+                <Text style={styles.arrow}>&gt;</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.recentButton} onPress={handleGoToRecent}>
+          <Text style={styles.recentButtonText}>최근학습</Text>
+          <Text style={styles.arrow}>&gt;</Text>
         </TouchableOpacity>
-
-        {years.map((year) => (
-          <TouchableOpacity
-            key={year}
-            style={[
-              styles.selectButton,
-              selectedYears.includes(year) && styles.selectedButton,
-            ]}
-            onPress={() => toggleYear(year)}
-          >
-            <Text style={styles.buttonText}>{year}년</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* 필터링된 모의고사 리스트 */}
-      <Text style={styles.title}>모의고사 목록</Text>
-      {selectedYears.length === 0 ? (
-        <Text style={styles.emptyText}>연도를 선택해주세요.</Text>
-      ) : filteredTests.length === 0 ? (
-        <Text style={styles.emptyText}>조건에 맞는 모의고사가 없습니다.</Text>
-      ) : (
-        filteredTests.map((test, idx) => (
-          <TouchableOpacity
-            key={idx}
-            style={styles.testCard}
-            onPress={() =>
-              navigation.navigate('MockTestDetail', {
-                year: test.year,
-                month: test.month,
-                grade: test.grade,
-              })
-            }
-          >
-            <Text>📘 {test.year}년 {test.month}월 - {test.grade}학년 모의고사</Text>
-          </TouchableOpacity>
-        ))
-      )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
+
+// 스타일 정의
 const styles = StyleSheet.create({
-  container: { padding: 20, alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: 'bold', marginVertical: 10 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
-  selectButton: {
-    backgroundColor: '#ddd',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    margin: 5,
+  container: {
+    flex: 1,
+    backgroundColor: '#f2f2f2',
+    padding: 20,
+    marginTop: 60,
+  },
+  section: {
+    marginBottom: normalize(50),
+  },
+  title: {
+    fontSize: normalize(26),
+    fontWeight: '800',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'center', // 버튼들을 수평 가운데로
+    alignItems: 'center',     // 버튼 높이 맞추기
+    gap: normalize(30),
+  },
+  button: {
+    paddingVertical: normalize(12),
+    paddingHorizontal: normalize(19),
+    borderRadius: normalize(21.5),
+    borderWidth: 1,
+    borderColor: '#cfcfcf',
   },
   selectedButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#78bfb8',
+    borderColor: '#78bfb8',
   },
-  buttonText: { color: '#000' },
-  testCard: {
-    backgroundColor: '#f2f2f2',
-    padding: 12,
-    borderRadius: 10,
-    marginVertical: 6,
-    width: '100%',
+  buttonText: {
+    fontSize: normalize(20),
+    color: '#000',
   },
-  emptyText: { marginTop: 10, color: '#999' },
+  selectedButtonText: {
+    color: '#fff',
+  },
+  yearButtonGroup: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'center',
+    gap: normalize(20),
+  },
+  yearButton: {
+    paddingVertical: normalize(10),
+    paddingHorizontal: normalize(20),
+    borderRadius: normalize(21.5),
+    borderWidth: normalize(1.7),
+    borderColor: '#cfcfcf',
+    alignItems: 'center',
+    marginBottom: normalize(-5),
+  },
+  selectedYearButton: {
+    borderColor: '#78bfb8',
+  },
+  yearButtonText: {
+    fontSize: normalize(20),
+    color: '#000',
+  },
+  rowWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: normalize(6)
+  },
+  selectedYearButtonText: {
+    color: '#000', // Figma design shows black text for selected year
+  },
+  allSelectedButton: {
+    backgroundColor: '#78bfb8',
+    borderColor: '#78bfb8',
+  },
+  allSelectedButtonText: {
+    color: '#fff',
+  },
+  plusIcon: {
+    width: normalize(12),
+    height: normalize(12),
+  },
+
+  checkIcon: {
+    width: normalize(12),
+    height: normalize(12),
+  },
+  listContainer: {
+    height: normalize(300),
+    backgroundColor: '#fff',
+    borderRadius: normalize(13),
+    padding: normalize(10),
+    paddingHorizontal: normalize(20),
+  },
+  listItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: normalize(20),
+    paddingLeft: normalize(20),
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+  },
+  listItemText: {
+    fontSize: normalize(20),
+  },
+  arrow: {
+    fontSize: normalize(20),
+    color: '#cfcfcf',
+  },
+  recentButton: {
+    backgroundColor: '#78bfb8',
+    borderRadius: 22,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: 20,
+  },
+  recentButtonText: {
+    color: '#fff',
+    fontSize: normalize(23),
+    fontWeight: '600',
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    zIndex: 10,
+  },
+  settingsIcon: {
+    width: normalize(40),
+    height: normalize(40),
+  },
 });
+

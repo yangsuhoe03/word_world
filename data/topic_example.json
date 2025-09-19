@@ -1,14 +1,16 @@
 [
   {
-    "number": "18",
+    "number": 18,
     "passage": "People often follow trends without thinking.",
     "topic_en": "Conformity and trends",
-    "topic_ko": "동조와 유행"
+    "topic_ko": "동조와 유행",
+    "isKnown": false
   },
   {
-    "number": "19",
+    "number": 19,
     "passage": "Technology has changed how we communicate.",
     "topic_en": "Impact of technology on communication",
-    "topic_ko": "기술이 의사소통에 미친 영향"
+    "topic_ko": "기술이 의사소통에 미친 영향",
+    "isKnown": false
   }
 ]
