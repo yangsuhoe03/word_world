@@ -1,9 +1,10 @@
 // 이 화면은 앱의 메인 홈 화면으로, 다양한 학습 메뉴(단어장, 해석, 모의고사 등)로 이동할 수 있는 네비게이션 역할을 합니다.
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler, Alert, Image, FlatList } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalize } from '../utils/normalize';
+import { problemFileMap } from '../data/problemFileMap';
 
 // 학년 선택을 위한 배열
 const grades = ['1', '2', '3'];
@@ -11,17 +12,12 @@ const years = ['all', '2025', '2024', '2023', '2022', '2021'];
 const plusIcon = require('../assets/icons/plus.png');
 const checkIcon = require('../assets/icons/check.png');
 
-// 모의고사 정보 배열 (연도, 월, 학년)
-const mockTests = [
-  { year: 2025, month: 3, grade: 1 },
-  { year: 2025, month: 6, grade: 1 },
-  { year: 2024, month: 3, grade: 1 },
-  { year: 2024, month: 6, grade: 2 },
-  { year: 2024, month: 9, grade: 2 },
-  { year: 2023, month: 3, grade: 3 },
-  { year: 2022, month: 6, grade: 3 },
-  { year: 2021, month: 9, grade: 3 },
-];
+const mockTests = Object.keys(problemFileMap).map(
+  key => {
+    const [year, month, grade] = key.split('_').map(
+      Number);
+    return { year, month, grade };
+  });
 
 export default function HomeScreen() {
   const navigation = useNavigation(); // 화면 이동을 위한 네비게이션 객체
@@ -74,34 +70,34 @@ export default function HomeScreen() {
     const allIndividualYears = years.slice(1);
 
     if (year === 'all') {
-        setSelectedYears(prev => {
-            // If 'all' is selected, deselect all. Otherwise, select 'all'.
-            if (prev.includes('all')) {
-                return [];
-            } else {
-                return ['all'];
-            }
-        });
-        return;
+      setSelectedYears(prev => {
+        // If 'all' is selected, deselect all. Otherwise, select 'all'.
+        if (prev.includes('all')) {
+          return [];
+        } else {
+          return ['all'];
+        }
+      });
+      return;
     }
 
     // Logic for individual year clicks
     setSelectedYears(prev => {
-        const newYears = prev.includes('all') ? [] : [...prev];
-        
-        if (newYears.includes(year)) {
-            // remove it
-            const nextYears = newYears.filter(y => y !== year);
-            return nextYears;
-        } else {
-            // add it
-            const nextYears = [...newYears, year];
-            // If adding this year means all years are now selected, collapse to ['all']
-            if (nextYears.length === allIndividualYears.length) {
-                return ['all'];
-            }
-            return nextYears;
+      const newYears = prev.includes('all') ? [] : [...prev];
+
+      if (newYears.includes(year)) {
+        // remove it
+        const nextYears = newYears.filter(y => y !== year);
+        return nextYears;
+      } else {
+        // add it
+        const nextYears = [...newYears, year];
+        // If adding this year means all years are now selected, collapse to ['all']
+        if (nextYears.length === allIndividualYears.length) {
+          return ['all'];
         }
+        return nextYears;
+      }
     });
   };
 
@@ -141,6 +137,7 @@ export default function HomeScreen() {
       >
         <Image source={require('../assets/icons/setting.png')} style={styles.settingsIcon} />
       </TouchableOpacity>
+
       <ScrollView style={styles.container}>
         <View style={styles.section}>
           <Text style={styles.title}>학년 선택</Text>
@@ -172,7 +169,7 @@ export default function HomeScreen() {
           <View style={styles.yearButtonGroup}>
             {years.map((year) => {
               const isAllButton = year === 'all';
-              
+
               let isSelected;
               if (isAllButton) {
                 isSelected = selectedYears.includes('all');
@@ -220,26 +217,31 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <Text style={styles.title}>모의고사 목록</Text>
-          <View style={styles.listContainer}>
-            {filteredTests.map((test, index) => (
+          {/* 기존의 View와 .map()을 FlatList 하나로 교체 */}
+          <FlatList
+            style={styles.listContainer} // 고정된 박스 스타일(높이, 배경색 등)을 여기에 적용
+            data={filteredTests}
+            // 각 항목에 고유한 키를 부여 (index보다 데이터 고유값으로 만드는 게 더 안정적)
+            keyExtractor={(item, index) => `${item.year}-${item.month}-${item.grade}-${index}`}
+            // 각 항목을 어떻게 그릴지 정의 (.map() 안의 내용을 그대로 옮기면 됨)
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={index}
                 style={styles.listItem}
                 onPress={() =>
                   navigation.navigate('MockTestDetail', {
-                    year: test.year,
-                    month: test.month,
-                    grade: test.grade,
+                    year: item.year,
+                    month: item.month,
+                    grade: item.grade,
                   })
                 }
               >
                 <Text style={styles.listItemText}>
-                  {test.year}년 {test.month}월 - {test.grade}학년 모의고사
+                  {item.year}년 {item.month}월 - {item.grade}학년 모의고사
                 </Text>
                 <Text style={styles.arrow}>&gt;</Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
+          />
         </View>
 
         <TouchableOpacity style={styles.recentButton} onPress={handleGoToRecent}>
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
   rowWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap : normalize(6)
+    gap: normalize(6)
   },
   selectedYearButtonText: {
     color: '#000', // Figma design shows black text for selected year

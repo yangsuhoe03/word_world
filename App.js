@@ -31,7 +31,13 @@ export default function App() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="OriginalProblem" component={OriginalProblemScreen} />
         <Stack.Screen name="Explanation" component={ExplanationScreen} />
-        <Stack.Screen name="TopIncorrect" component={TopIncorrectScreen} />
+        <Stack.Screen 
+          name="TopIncorrect" 
+          component={TopIncorrectScreen} 
+          options={({ route }) => ({ 
+            title: `${route.params.year}년 ${route.params.month}월 ${route.params.grade}학년 모의고사` 
+          })} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
