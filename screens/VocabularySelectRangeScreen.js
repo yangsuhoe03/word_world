@@ -94,30 +94,32 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
     return (
         <Container style={styles.container}>
             <Text style={styles.title}>어휘 회독 범위를 선택하세요</Text>
-            {ranges.map(rangeObj => {
+            {ranges.map((rangeObj, index) => {
                 const rangeData = infoForKey[rangeObj.value];
+                const reviewCount = (rangeData?.reviewTimes?.length || 0) + 1;
+                const rangeLabel = `No. ${rangeObj.label.replace('번', '').replace(' ~ ', ' ~ ')}`;
+
                 return (
-                    <View key={rangeObj.value} style={{width: '100%', alignItems: 'center'}}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => handleSelectRange(rangeObj.value)}
+                    <TouchableOpacity
+                        key={rangeObj.value}
+                        style={styles.sessionButton}
+                        onPress={() => handleSelectRange(rangeObj.value)}
+                    >
+                        <View style={styles.sessionHeader}>
+                            <Text style={styles.sessionTitle}>Session {index + 1}</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setSelectedReviewTimes(rangeData && rangeData.reviewTimes ? rangeData.reviewTimes : []);
+                                    setSelectedRangeLabel(rangeObj.label);
+                                    setModalVisible(true);
+                                }}
                             >
-                            <Text style={styles.buttonText}>
-                                {rangeObj.label}
-                            </Text>
-                        <Button
-                            title="회독 기록 보기"
-                            color="#888"
-                            onPress={() => {
-                                setSelectedReviewTimes(rangeData && rangeData.reviewTimes ? rangeData.reviewTimes : []);
-                                setSelectedRangeLabel(rangeObj.label);
-                                setModalVisible(true);
-                            }}
-                        />
-                        </TouchableOpacity>
-
-
-                    </View>
+                                <Text style={styles.historyIcon}>☰</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.reviewCountText}>{reviewCount}회독</Text>
+                        <Text style={styles.rangeLabelText}>{rangeLabel}</Text>
+                    </TouchableOpacity>
                 );
             })}
             <Modal
@@ -143,8 +145,8 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
                 </View>
             </Modal>
             {/* 회독 정보 초기화 버튼 */}
-            <TouchableOpacity style={[styles.button, {backgroundColor: 'red'}]} onPress={clearReviewInfo}>
-                <Text style={styles.buttonText}>회독 정보 초기화</Text>
+            <TouchableOpacity style={[styles.resetButton]} onPress={clearReviewInfo}>
+                <Text style={styles.resetButtonText}>회독 정보 초기화</Text>
             </TouchableOpacity>
         </Container>
     );
@@ -154,6 +156,51 @@ export default function VocabularySelectRangeScreen({route, navigation}) {
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     title: { fontSize: 20, marginBottom: 20 },
-    button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 10, marginVertical: 10 },
-    buttonText: { color: 'white', fontSize: 16 },
+    sessionButton: {
+        backgroundColor: '#78BFB8',
+        borderRadius: 0,
+        padding: 20,
+        width: '60%',
+        marginVertical: 30,
+    },
+    sessionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    sessionTitle: {
+        color: 'white',
+        fontSize: 28,
+        fontWeight: 'bold',
+    },
+    historyIcon: {
+        color: 'white',
+        fontSize: 24,
+    },
+    reviewCountText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'normal',
+        textAlign: 'center',
+        marginVertical: 5,
+    },
+    rangeLabelText: {
+        color: 'white',
+        fontSize: 20,
+        textAlign: 'center',
+    },
+    resetButton: {
+        backgroundColor: 'red',
+        borderRadius: 15,
+        padding: 15,
+        width: '80%',
+        marginVertical: 10,
+    },
+    resetButtonText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
 });

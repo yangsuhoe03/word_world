@@ -26,6 +26,7 @@ export default function TopicScreen({route, navigation}) {
   const [startTime, setStartTime] = useState(null); // 공부 시작 시간
   const [endTime, setEndTime] = useState(null); // 공부 종료 시간
   const [totalStudyTime, setTotalStudyTime] = useState(0); // 누적 공부 시간(초)
+  const [dataNotFound, setDataNotFound] = useState(false);
 
   // route에서 연도, 월, 학년 파라미터 받기
   const year = route.params.year;
@@ -37,7 +38,13 @@ export default function TopicScreen({route, navigation}) {
     // key 예시: 2025_03_1
     const key = `${year}_${String(month).padStart(2, '0')}_${grade}`; // 파일명 규칙에 맞게 key 생성
     const data = topicFileMap[key]; // 해당 key로 주제 데이터 찾기
-    setTopicData(shuffleArray(data)); // 전체를 랜덤하게 섞어서 사용
+    if (data) {
+      setTopicData(shuffleArray(data)); // 전체를 랜덤하게 섞어서 사용
+      setDataNotFound(false);
+    } else {
+      setTopicData([]); // 데이터가 없으면 빈 배열로 설정
+      setDataNotFound(true);
+    }
     setIndex(0); // 새 데이터 로드 시 인덱스 초기화
     setShowTopicEn(false);
     setShowTopicKo(false);
@@ -60,7 +67,7 @@ export default function TopicScreen({route, navigation}) {
   if (!topicData || topicData.length === 0) {
     return (
       <Container style={styles.container}>
-        <Text>주제 데이터를 불러오는 중입니다...</Text>
+        <Text>{dataNotFound ? "현재 데이터가 없습니다" : "주제 데이터를 불러오는 중입니다..."}</Text>
       </Container>
     );
   }

@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, marginBottom: 20 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#78BFB8',
     padding: 12,
     borderRadius: 8,
     margin: 6,

@@ -223,26 +223,31 @@ export default function VocabularyScreen({route, navigation}) {
             ) : (
                 <>
                     {/* 회독 중일 때의 UI */}
-                    <Text style={styles.number}>{index + 1} / {words.length}</Text>
-                    <Text style={styles.word}>{word.word}</Text>
-                    {showMeaning && (
-                        <Container style={styles.meaningBox}>
-                            <Text style={styles.meaning}>{word.meaning}</Text>
-                        </Container>
-                    )}
-                    <Text style={styles.example}>{word.example}</Text>
-                    {showMeaning && (
-                        <Container style={styles.meaningBox}>
-                            <Text style={styles.exampleMeaning}>{word.examplemeaning}</Text>
-                        </Container>
-                    )}
-                    <Button
-                        title={showMeaning ? "해석 숨기기" : "해석 보기"}
+                    <View style={styles.card}>
+                        <Text style={styles.number}>{index + 1} / {words.length}</Text>
+                        <Text style={styles.word}>{word.word}</Text>
+                        <Text style={styles.meaning}>{showMeaning ? word.meaning : ''}</Text>
+                    </View>
+
+                    <View style={styles.card}>
+                        <Text style={styles.example}>{word.example}</Text>
+                        <Text style={styles.exampleMeaning}>{showMeaning ? word.examplemeaning : ''}</Text>
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.meaningButton, { backgroundColor: '#FFA6A6' }]}
                         onPress={() => setShowMeaning(!showMeaning)}
-                    />
+                    >
+                        <Text style={styles.meaningButtonText}>뜻</Text>
+                    </TouchableOpacity>
+                    
                     <Container style={styles.buttonRow}>
-                        <Button title="✅ 알고 있음" onPress={handleKnow} />
-                        <Button title="❌ 모르겠음" onPress={handleDontKnow} />
+                        <TouchableOpacity style={styles.actionButton} onPress={handleKnow}>
+                            <Text style={styles.actionButtonText}>알고있음</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionButton} onPress={handleDontKnow}>
+                            <Text style={styles.actionButtonText}>모르겠음</Text>
+                        </TouchableOpacity>
                     </Container>
                 </>
             )}
@@ -252,25 +257,78 @@ export default function VocabularyScreen({route, navigation}) {
 
 // 스타일 정의
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 24, justifyContent: 'center', alignItems: 'center' },
-    number: { fontSize: 16, marginBottom: 10 },
-    word: { fontSize: 32, fontWeight: 'bold', marginBottom: 20 },
-    meaningBox: { marginVertical: 20, alignItems: 'center' },
-    meaning: { fontSize: 20, color: '#333', marginBottom: 10 },
-    example: { fontSize: 16, fontStyle: 'italic' },
-    exampleMeaning: { fontSize: 16, marginTop: 4, color: '#555' },
-    buttonRow: { flexDirection: 'row', gap: 20 },
-    button: {
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 10,
+    container: { flex: 1, padding: 24, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0' },
+    card: {
+        backgroundColor: 'white',
+        borderRadius: 15,
+        padding: 20,
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
     },
-    buttonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
+    number: {
+        position: 'absolute',
+        top: 15,
+        left: 15,
+        fontSize: 16,
+        color: '#888',
+    },
+    word: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        marginVertical: 20,
+    },
+    meaning: {
+        fontSize: 24,
+        color: '#333',
+        marginTop: 10,
+    },
+    example: {
+        fontSize: 18,
+        fontStyle: 'italic',
+        textAlign: 'center',
+    },
+    exampleMeaning: {
+        fontSize: 16,
+        marginTop: 10,
+        color: '#555',
+        textAlign: 'center',
+    },
+    meaningButton: {
+        width: '100%',
+        paddingVertical: 8,
+        paddingHorizontal: 25,
+        borderRadius: 20,
+        marginVertical: 10,
+        marginBottom: 20,
+        alignItems: 'center',
+    },
+    meaningButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    actionButton: {
+        backgroundColor: '#fff',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    actionButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#555',
     },
 });
